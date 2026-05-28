@@ -1,8 +1,10 @@
 import { AuthButton } from "@/components/auth-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server";
 import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 const features = [
@@ -46,7 +48,13 @@ const steps = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getClaims();
+
+  if (data?.claims) {
+    redirect("/dashboard");
+  }
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <div className="border-b border-slate-200 bg-white/90 backdrop-blur">

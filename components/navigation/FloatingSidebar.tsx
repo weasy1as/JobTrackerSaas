@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { BarChart3, CreditCard, LayoutDashboard, Settings } from "lucide-react";
 
 import SidebarItem from "@/components/navigation/SidebarItem";
+import { LogoutButton } from "@/components/logout-button";
 
 const navItems = [
   {
@@ -62,6 +63,10 @@ export default function FloatingSidebar() {
             Use this sidebar to jump between analytics, billing, and settings
             without leaving your workflow.
           </p>
+        </div>
+
+        <div className="pt-2">
+          <LogoutButton />
         </div>
       </nav>
     </aside>

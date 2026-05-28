@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { LogoutButton } from "@/components/logout-button";
 
 const navItems = [
   {
@@ -87,6 +88,10 @@ export default function MobileNavigation() {
               {label}
             </Link>
           ))}
+
+          <div className="pt-2">
+            <LogoutButton />
+          </div>
         </nav>
       )}
     </div>
