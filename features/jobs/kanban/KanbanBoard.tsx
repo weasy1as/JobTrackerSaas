@@ -1,0 +1,110 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { DragDropProvider } from "@dnd-kit/react";
+import { Job, JobStatus } from "./types";
+import { dummyJobs } from "./dummy-jobs";
+import { KanbanColumn } from "./KanbanColumn";
+import { JobCard } from "./JobCard";
+
+const statuses: JobStatus[] = [
+  "Applied",
+  "Interview",
+  "Offer",
+  "Rejected",
+  "Ghosted",
+];
+
+function isStatusId(id: string): id is JobStatus {
+  return statuses.includes(id as JobStatus);
+}
+
+export default function KanbanBoard() {
+  const [jobs, setJobs] = useState<Job[]>(dummyJobs);
+
+  const groupedJobs = useMemo(
+    () =>
+      statuses.reduce(
+        (acc, status) => {
+          acc[status] = jobs.filter((job) => job.status === status);
+          return acc;
+        },
+        {} as Record<JobStatus, Job[]>,
+      ),
+    [jobs],
+  );
+
+  const handleDragEnd = (event: any) => {
+    if (event.canceled) return;
+
+    const jobId = event.operation?.source?.id as string | undefined;
+    const targetId = event.operation?.target?.id as string | undefined;
+    if (!jobId || !targetId || jobId === targetId) return;
+
+    const sourceJob = jobs.find((job) => job.id === jobId);
+    if (!sourceJob) return;
+
+    const targetJob = jobs.find((job) => job.id === targetId);
+    const targetStatus = targetJob
+      ? targetJob.status
+      : isStatusId(targetId)
+        ? targetId
+        : undefined;
+    if (!targetStatus) return;
+
+    setJobs((currentJobs) => {
+      const nextJobs = currentJobs.filter((job) => job.id !== jobId);
+      const movedJob = { ...sourceJob, status: targetStatus };
+
+      if (targetJob) {
+        const insertIndex = nextJobs.findIndex(
+          (job) => job.id === targetJob.id,
+        );
+        if (insertIndex === -1) {
+          return [...nextJobs, movedJob];
+        }
+        return [
+          ...nextJobs.slice(0, insertIndex),
+          movedJob,
+          ...nextJobs.slice(insertIndex),
+        ];
+      }
+
+      return [...nextJobs, movedJob];
+    });
+  };
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.32em] text-indigo-600">
+          Dashboard
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
+          Job pipeline
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+          Track your applications through every stage with drag-and-drop cards.
+        </p>
+      </div>
+
+      <DragDropProvider onDragEnd={handleDragEnd}>
+        <div className="overflow-x-auto pb-6">
+          <div className="flex min-w-[1200px] gap-6">
+            {statuses.map((status) => (
+              <KanbanColumn
+                key={status}
+                status={status}
+                jobs={groupedJobs[status]}
+              >
+                {groupedJobs[status].map((job) => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </KanbanColumn>
+            ))}
+          </div>
+        </div>
+      </DragDropProvider>
+    </div>
+  );
+}
