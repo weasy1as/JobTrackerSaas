@@ -89,20 +89,18 @@ export default function KanbanBoard() {
       </div>
 
       <DragDropProvider onDragEnd={handleDragEnd}>
-        <div className="overflow-x-auto pb-6">
-          <div className="flex min-w-[1200px] gap-6">
-            {statuses.map((status) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                jobs={groupedJobs[status]}
-              >
-                {groupedJobs[status].map((job) => (
-                  <JobCard key={job.id} job={job} />
-                ))}
-              </KanbanColumn>
-            ))}
-          </div>
+        <div className="grid w-full max-w-full gap-6 pb-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {statuses.map((status) => (
+            <KanbanColumn
+              key={status}
+              status={status}
+              jobs={groupedJobs[status]}
+            >
+              {groupedJobs[status].map((job) => (
+                <JobCard key={job.id} job={job} />
+              ))}
+            </KanbanColumn>
+          ))}
         </div>
       </DragDropProvider>
     </div>

@@ -22,7 +22,7 @@ export function KanbanColumn({ status, jobs, children }: KanbanColumnProps) {
   const { ref, isDropTarget: isOver } = useDroppable({ id: status });
 
   return (
-    <div className="min-w-[300px] shrink-0">
+    <div className="w-full">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
