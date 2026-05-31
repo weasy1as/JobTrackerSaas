@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { DragDropProvider } from "@dnd-kit/react";
 import { Job, JobStatus } from "./types";
-import { dummyJobs } from "./dummy-jobs";
 import { KanbanColumn } from "./KanbanColumn";
 import { JobCard } from "./JobCard";
 
@@ -15,12 +14,16 @@ const statuses: JobStatus[] = [
   "Ghosted",
 ];
 
+interface KanbanBoardProps {
+  jobs: Job[];
+}
+
 function isStatusId(id: string): id is JobStatus {
   return statuses.includes(id as JobStatus);
 }
 
-export default function KanbanBoard() {
-  const [jobs, setJobs] = useState<Job[]>(dummyJobs);
+export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
+  const [jobs, setJobs] = useState<Job[]>(initialJobs);
 
   const groupedJobs = useMemo(
     () =>
