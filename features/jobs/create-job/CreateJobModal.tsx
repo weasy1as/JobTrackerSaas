@@ -49,7 +49,7 @@ export function CreateJobModal({
 
   return (
     <div
-      className="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+      className=" flex items-center justify-center bg-slate-950/40 p-4"
       onClick={() => onOpenChange(false)}
     >
       <div

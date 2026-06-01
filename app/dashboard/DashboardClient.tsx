@@ -25,7 +25,7 @@ export default function DashboardClient({ jobs }: DashboardClientProps) {
       <div className="grid w-full gap-8 px-6 py-10 lg:grid-cols-[260px_minmax(0,1fr)]">
         <MobileNavigation />
         <FloatingSidebar />
-        <section className="relative w-full rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="relative w-full flex flex-col-reverse md:flex-row rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
           {/* BLUR LAYER WRAPPER */}
           <div className={open ? "blur-sm transition-all duration-200" : ""}>
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

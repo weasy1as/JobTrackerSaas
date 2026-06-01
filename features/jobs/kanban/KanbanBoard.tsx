@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DragDropProvider } from "@dnd-kit/react";
 import { Job, JobStatus } from "./types";
 import { KanbanColumn } from "./KanbanColumn";
@@ -24,6 +24,10 @@ function isStatusId(id: string): id is JobStatus {
 
 export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
+
+  useEffect(() => {
+    setJobs(initialJobs);
+  }, [initialJobs]);
 
   const groupedJobs = useMemo(
     () =>
