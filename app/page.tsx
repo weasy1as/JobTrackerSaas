@@ -49,12 +49,6 @@ const steps = [
 ];
 
 export default async function Home() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.getClaims();
-
-  if (data?.claims) {
-    redirect("/dashboard");
-  }
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <div className="border-b border-slate-200 bg-white/90 backdrop-blur">
