@@ -117,7 +117,7 @@ export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
           </p>
         </div>
         <DragDropProvider onDragEnd={handleDragEnd}>
-          <div className="grid w-full max-w-full gap-6 pb-6 grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid w-full max-w-full gap-6 pb-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {statuses.map((status) => (
               <KanbanColumn
                 key={status}

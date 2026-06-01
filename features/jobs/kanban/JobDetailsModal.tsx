@@ -137,7 +137,7 @@ export function JobDetailsModal({
   if (!open || !job || !values) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 w-auto">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={handleCancel}
@@ -164,7 +164,7 @@ export function JobDetailsModal({
         </div>
 
         <div className="space-y-6 p-6">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex gap-8 flex-col md:flex-row">
             <div>
               <Label htmlFor="company">Company</Label>
               <Input
@@ -187,7 +187,7 @@ export function JobDetailsModal({
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex gap-8 flex-col md:flex-row">
             <div>
               <Label htmlFor="status">Status</Label>
               <select
@@ -222,7 +222,7 @@ export function JobDetailsModal({
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex gap-8 flex-col md:flex-row">
             <div>
               <Label htmlFor="location">Location</Label>
               <Input
@@ -246,7 +246,7 @@ export function JobDetailsModal({
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex gap-8 flex-col md:flex-row">
             <div>
               <Label htmlFor="contactName">Contact name</Label>
               <Input
