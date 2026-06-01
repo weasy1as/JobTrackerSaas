@@ -11,6 +11,7 @@ interface JobDetailsModalProps {
   open: boolean;
   onClose: () => void;
   onUpdate: (job: Job) => void;
+  onDelete: (jobId: string) => void;
 }
 
 interface JobDetailsFormValues {
@@ -39,6 +40,7 @@ export function JobDetailsModal({
   open,
   onClose,
   onUpdate,
+  onDelete,
 }: JobDetailsModalProps) {
   const [values, setValues] = useState<JobDetailsFormValues | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -129,6 +131,33 @@ export function JobDetailsModal({
       onClose();
     } catch (error) {
       console.error("Unable to update job", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!job) return;
+    const confirmed = window.confirm(
+      "Delete this job? This action cannot be undone.",
+    );
+    if (!confirmed) return;
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/jobs/${job.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        console.error("Failed to delete job", await response.text());
+        return;
+      }
+
+      onDelete(job.id);
+      onClose();
+    } catch (error) {
+      console.error("Unable to delete job", error);
     } finally {
       setIsSaving(false);
     }
@@ -298,17 +327,28 @@ export function JobDetailsModal({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4">
-          {isDirty ? (
-            <>
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={handleCancel}
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
+        <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-3">
+            <Button
+              variant="destructive"
+              type="button"
+              onClick={handleDelete}
+              disabled={isSaving}
+            >
+              Delete
+            </Button>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={handleCancel}
+              disabled={isSaving}
+            >
+              Cancel
+            </Button>
+          </div>
+
+          <div>
+            {isDirty ? (
               <Button
                 type="button"
                 onClick={handleUpdate}
@@ -316,12 +356,12 @@ export function JobDetailsModal({
               >
                 {isSaving ? "Updating..." : "Update"}
               </Button>
-            </>
-          ) : (
-            <p className="text-sm text-slate-500">
-              Edit any field to enable update.
-            </p>
-          )}
+            ) : (
+              <p className="text-sm text-slate-500">
+                Edit any field to enable update.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -157,6 +157,16 @@ export async function updateJobStatus(
   return mapJobRecord(data as JobSelectRecord);
 }
 
+export async function deleteJob(jobId: string): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("jobs").delete().eq("id", jobId);
+
+  if (error) {
+    throw new Error(error.message ?? "Failed to delete job");
+  }
+}
+
 export async function updateJob(
   jobId: string,
   payload: UpdateJobPayload,

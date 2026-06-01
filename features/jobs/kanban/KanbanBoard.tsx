@@ -149,6 +149,12 @@ export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
           );
           setSelectedJob(updatedJob);
         }}
+        onDelete={(jobId) => {
+          setJobs((currentJobs) =>
+            currentJobs.filter((job) => job.id !== jobId),
+          );
+          setSelectedJob(null);
+        }}
       />
     </div>
   );
