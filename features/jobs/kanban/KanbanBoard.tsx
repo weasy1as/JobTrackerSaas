@@ -59,6 +59,10 @@ export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
         : undefined;
     if (!targetStatus) return;
 
+    // Don't update if status hasn't changed
+    if (sourceJob.status === targetStatus) return;
+
+    // Optimistic UI update
     setJobs((currentJobs) => {
       const nextJobs = currentJobs.filter((job) => job.id !== jobId);
       const movedJob = { ...sourceJob, status: targetStatus };
@@ -78,6 +82,19 @@ export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
       }
 
       return [...nextJobs, movedJob];
+    });
+
+    // Persist to Supabase
+    fetch(`/api/jobs/${jobId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: targetStatus }),
+    }).catch((error) => {
+      console.error("Failed to update job status:", error);
+      // Revert UI on failure
+      setJobs(jobs);
     });
   };
 

@@ -16,6 +16,11 @@ interface JobRecord {
   date_applied: string | null;
 }
 
+type JobSelectRecord = Pick<
+  JobRecord,
+  "id" | "company" | "title" | "status" | "date_applied"
+>;
+
 export interface CreateJobPayload {
   id: string;
   company: string;
@@ -29,6 +34,10 @@ export interface CreateJobPayload {
   notes: string;
 }
 
+export interface UpdateJobPayload {
+  status: JobStatus;
+}
+
 const statuses: JobStatus[] = [
   "Applied",
   "Interview",
@@ -37,7 +46,7 @@ const statuses: JobStatus[] = [
   "Ghosted",
 ];
 
-function mapJobRecord(job: JobRecord): Job {
+function mapJobRecord(job: JobSelectRecord): Job {
   return {
     id: job.id,
     company: job.company ?? "",
@@ -51,7 +60,7 @@ export async function getJobs(): Promise<Job[]> {
   const supabase = await createClient(); // ✅ move INSIDE function
 
   const { data } = await supabase
-    .from<JobRecord>("jobs")
+    .from("jobs")
     .select("id, company, title, status, date_applied")
     .order("created_at", { ascending: false });
 
@@ -68,7 +77,7 @@ export async function createJob(payload: CreateJobPayload): Promise<Job> {
   const userId = user?.id;
 
   const { data, error } = await supabase
-    .from<JobRecord>("jobs")
+    .from("jobs")
     .insert({
       user_id: userId,
       company: payload.company,
@@ -89,5 +98,27 @@ export async function createJob(payload: CreateJobPayload): Promise<Job> {
     throw new Error(error?.message ?? "Failed to create job");
   }
 
-  return mapJobRecord(data);
+  return mapJobRecord(data as JobSelectRecord);
+}
+
+export async function updateJobStatus(
+  jobId: string,
+  payload: UpdateJobPayload,
+): Promise<Job> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("jobs")
+    .update({
+      status: payload.status,
+    })
+    .eq("id", jobId)
+    .select("id, company, title, status, date_applied")
+    .single();
+
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to update job status");
+  }
+
+  return mapJobRecord(data as JobSelectRecord);
 }
