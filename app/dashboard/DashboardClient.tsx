@@ -19,6 +19,7 @@ export default function DashboardClient({ jobs }: DashboardClientProps) {
   const handleJobCreated = (job: Job) => {
     setJobList((current) => [job, ...current]);
   };
+  console.log(jobs);
 
   return (
     <main className="min-h-screen bg-slate-50">

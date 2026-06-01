@@ -141,6 +141,14 @@ export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
         job={selectedJob}
         open={Boolean(selectedJob)}
         onClose={() => setSelectedJob(null)}
+        onUpdate={(updatedJob) => {
+          setJobs((currentJobs) =>
+            currentJobs.map((job) =>
+              job.id === updatedJob.id ? updatedJob : job,
+            ),
+          );
+          setSelectedJob(updatedJob);
+        }}
       />
     </div>
   );

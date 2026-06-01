@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { updateJobStatus } from "@/lib/supabase/jobs";
+import { updateJob, updateJobStatus } from "@/lib/supabase/jobs";
 
 export async function PATCH(
   request: Request,
@@ -8,7 +8,15 @@ export async function PATCH(
   try {
     const { id } = await params;
     const payload = await request.json();
-    const job = await updateJobStatus(id, payload);
+
+    const job =
+      payload &&
+      typeof payload === "object" &&
+      "status" in payload &&
+      Object.keys(payload).length === 1
+        ? await updateJobStatus(id, payload)
+        : await updateJob(id, payload);
+
     return NextResponse.json(job);
   } catch (error) {
     return NextResponse.json(

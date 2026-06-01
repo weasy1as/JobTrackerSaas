@@ -10,5 +10,11 @@ export interface Job {
   company: string;
   title: string;
   status: JobStatus;
+  source: string;
+  location: string;
+  url: string;
+  contactName: string;
+  contactEmail: string;
+  notes: string;
   dateApplied: string;
 }

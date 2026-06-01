@@ -18,11 +18,20 @@ interface JobRecord {
 
 type JobSelectRecord = Pick<
   JobRecord,
-  "id" | "company" | "title" | "status" | "date_applied"
+  | "id"
+  | "company"
+  | "title"
+  | "status"
+  | "source"
+  | "location"
+  | "job_url"
+  | "contact_name"
+  | "contact_email"
+  | "notes"
+  | "date_applied"
 >;
 
 export interface CreateJobPayload {
-  id: string;
   company: string;
   title: string;
   source: string;
@@ -35,6 +44,19 @@ export interface CreateJobPayload {
 }
 
 export interface UpdateJobPayload {
+  company: string;
+  title: string;
+  source: string;
+  status: JobStatus;
+  location: string;
+  url: string;
+  contactName: string;
+  contactEmail: string;
+  notes: string;
+  dateApplied: string;
+}
+
+export interface UpdateJobStatusPayload {
   status: JobStatus;
 }
 
@@ -52,23 +74,31 @@ function mapJobRecord(job: JobSelectRecord): Job {
     company: job.company ?? "",
     title: job.title ?? "",
     status: normalizeStatus(job.status, statuses, "Applied"),
+    source: job.source ?? "",
+    location: job.location ?? "",
+    url: job.job_url ?? "",
+    contactName: job.contact_name ?? "",
+    contactEmail: job.contact_email ?? "",
+    notes: job.notes ?? "",
     dateApplied: formatDate(job.date_applied),
   };
 }
 
 export async function getJobs(): Promise<Job[]> {
-  const supabase = await createClient(); // ✅ move INSIDE function
+  const supabase = await createClient();
 
   const { data } = await supabase
     .from("jobs")
-    .select("id, company, title, status, date_applied")
+    .select(
+      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied",
+    )
     .order("created_at", { ascending: false });
 
   return (data ?? []).map(mapJobRecord);
 }
 
 export async function createJob(payload: CreateJobPayload): Promise<Job> {
-  const supabase = await createClient(); // ✅ inside function
+  const supabase = await createClient();
 
   const {
     data: { user },
@@ -91,7 +121,9 @@ export async function createJob(payload: CreateJobPayload): Promise<Job> {
       notes: payload.notes || null,
       date_applied: new Date().toISOString(),
     })
-    .select("id, company, title, status, date_applied")
+    .select(
+      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied",
+    )
     .single();
 
   if (error || !data) {
@@ -103,7 +135,7 @@ export async function createJob(payload: CreateJobPayload): Promise<Job> {
 
 export async function updateJobStatus(
   jobId: string,
-  payload: UpdateJobPayload,
+  payload: UpdateJobStatusPayload,
 ): Promise<Job> {
   const supabase = await createClient();
 
@@ -113,11 +145,46 @@ export async function updateJobStatus(
       status: payload.status,
     })
     .eq("id", jobId)
-    .select("id, company, title, status, date_applied")
+    .select(
+      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied",
+    )
     .single();
 
   if (error || !data) {
     throw new Error(error?.message ?? "Failed to update job status");
+  }
+
+  return mapJobRecord(data as JobSelectRecord);
+}
+
+export async function updateJob(
+  jobId: string,
+  payload: UpdateJobPayload,
+): Promise<Job> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("jobs")
+    .update({
+      company: payload.company,
+      title: payload.title,
+      status: payload.status,
+      source: payload.source,
+      location: payload.location || null,
+      job_url: payload.url || null,
+      contact_name: payload.contactName || null,
+      contact_email: payload.contactEmail || null,
+      notes: payload.notes || null,
+      date_applied: payload.dateApplied || null,
+    })
+    .eq("id", jobId)
+    .select(
+      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied",
+    )
+    .single();
+
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to update job");
   }
 
   return mapJobRecord(data as JobSelectRecord);
