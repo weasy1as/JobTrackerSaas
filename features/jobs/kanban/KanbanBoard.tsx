@@ -5,6 +5,7 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { Job, JobStatus } from "./types";
 import { KanbanColumn } from "./KanbanColumn";
 import { JobCard } from "./JobCard";
+import { JobDetailsModal } from "./JobDetailsModal";
 
 const statuses: JobStatus[] = [
   "Applied",
@@ -24,6 +25,7 @@ function isStatusId(id: string): id is JobStatus {
 
 export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   useEffect(() => {
     setJobs(initialJobs);
@@ -99,34 +101,47 @@ export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex space-y-8">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.32em] text-indigo-600">
-          Dashboard
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
-          Job pipeline
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          Track your applications through every stage with drag-and-drop cards.
-        </p>
+        {" "}
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.32em] text-indigo-600">
+            Dashboard
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
+            Job pipeline
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+            Track your applications through every stage with drag-and-drop
+            cards.
+          </p>
+        </div>
+        <DragDropProvider onDragEnd={handleDragEnd}>
+          <div className="grid w-full max-w-full gap-6 pb-6 grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5">
+            {statuses.map((status) => (
+              <KanbanColumn
+                key={status}
+                status={status}
+                jobs={groupedJobs[status]}
+              >
+                {groupedJobs[status].map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onClick={() => setSelectedJob(job)}
+                  />
+                ))}
+              </KanbanColumn>
+            ))}
+          </div>
+        </DragDropProvider>
       </div>
 
-      <DragDropProvider onDragEnd={handleDragEnd}>
-        <div className="grid w-full max-w-full gap-6 pb-6 grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5">
-          {statuses.map((status) => (
-            <KanbanColumn
-              key={status}
-              status={status}
-              jobs={groupedJobs[status]}
-            >
-              {groupedJobs[status].map((job) => (
-                <JobCard key={job.id} job={job} />
-              ))}
-            </KanbanColumn>
-          ))}
-        </div>
-      </DragDropProvider>
+      <JobDetailsModal
+        job={selectedJob}
+        open={Boolean(selectedJob)}
+        onClose={() => setSelectedJob(null)}
+      />
     </div>
   );
 }
