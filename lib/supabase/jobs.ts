@@ -87,12 +87,30 @@ function mapJobRecord(job: JobSelectRecord): Job {
 export async function getJobs(): Promise<Job[]> {
   const supabase = await createClient();
 
-  const { data } = await supabase
+  // 1. Get current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.error("No authenticated user found");
+    return [];
+  }
+
+  // 2. Fetch only this user's jobs
+  const { data, error } = await supabase
     .from("jobs")
     .select(
       "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied",
     )
+    .eq("user_id", user.id) // 🔥 THIS IS THE KEY FIX
     .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to fetch jobs:", error);
+    return [];
+  }
 
   return (data ?? []).map(mapJobRecord);
 }

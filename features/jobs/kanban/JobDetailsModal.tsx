@@ -44,10 +44,36 @@ export function JobDetailsModal({
 }: JobDetailsModalProps) {
   const [values, setValues] = useState<JobDetailsFormValues | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<any | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const handleGenerateAI = async () => {
+    if (!job) return;
+    setAiError(null);
+    setAiLoading(true);
+    try {
+      const res = await fetch(`/api/jobs/${job.id}/insights`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAiError(data?.error || "Failed to generate insights");
+      } else {
+        setAiResult(data);
+      }
+    } catch (e) {
+      setAiError((e as Error).message);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!job) {
       setValues(null);
+      setAiResult(null);
+      setAiError(null);
       return;
     }
 
@@ -325,6 +351,95 @@ export function JobDetailsModal({
               />
             </div>
           </div>
+        </div>
+
+        <div className="border-t border-slate-200 px-6 py-4">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-700">
+              AI Insights
+            </h3>
+            <div>
+              <Button
+                type="button"
+                onClick={handleGenerateAI}
+                disabled={aiLoading}
+              >
+                {aiLoading ? "Analyzing..." : "Generate AI Insights"}
+              </Button>
+            </div>
+          </div>
+
+          {aiError ? (
+            <p className="text-sm text-destructive">{aiError}</p>
+          ) : null}
+
+          {aiResult ? (
+            <div className="space-y-3 rounded-lg border border-slate-100 bg-slate-50 p-4">
+              {aiResult.summary ? (
+                <div>
+                  <p className="text-sm font-semibold">Summary</p>
+                  <p className="text-sm text-slate-700">{aiResult.summary}</p>
+                </div>
+              ) : null}
+
+              {aiResult.key_skills ? (
+                <div>
+                  <p className="text-sm font-semibold">Key skills</p>
+                  <ul className="ml-4 list-disc text-sm text-slate-700">
+                    {aiResult.key_skills.map((s: string) => (
+                      <li key={s}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {aiResult.interview_questions ? (
+                <div>
+                  <p className="text-sm font-semibold">Interview questions</p>
+                  <ol className="ml-4 list-decimal text-sm text-slate-700">
+                    {aiResult.interview_questions.map(
+                      (q: string, i: number) => (
+                        <li key={i}>{q}</li>
+                      ),
+                    )}
+                  </ol>
+                </div>
+              ) : null}
+
+              {aiResult.preparation_plan ? (
+                <div>
+                  <p className="text-sm font-semibold">Preparation plan</p>
+                  <ol className="ml-4 list-decimal text-sm text-slate-700">
+                    {aiResult.preparation_plan.map((p: string, i: number) => (
+                      <li key={i}>{p}</li>
+                    ))}
+                  </ol>
+                </div>
+              ) : null}
+
+              {aiResult.weak_areas_to_improve ? (
+                <div>
+                  <p className="text-sm font-semibold">Areas to improve</p>
+                  <ul className="ml-4 list-disc text-sm text-slate-700">
+                    {aiResult.weak_areas_to_improve.map((w: string) => (
+                      <li key={w}>{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {aiResult.difficulty ? (
+                <div>
+                  <p className="text-sm font-semibold">Difficulty</p>
+                  <p className="text-sm text-slate-700">
+                    {aiResult.difficulty}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500">No insights yet.</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
