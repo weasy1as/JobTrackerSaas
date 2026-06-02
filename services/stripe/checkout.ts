@@ -26,11 +26,7 @@ export async function createStripeCheckoutSession({
         quantity: 1,
       },
     ],
-    subscription_data: {
-      metadata: {
-        userId,
-      },
-    },
+
     metadata: {
       userId,
     },

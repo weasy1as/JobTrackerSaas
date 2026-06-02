@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { stripe, stripeWebhookSecret } from "@/lib/stripe";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
   const stripeSignature = request.headers.get("stripe-signature");
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { error } = await supabase
       .from("subscriptions")
       .update({
