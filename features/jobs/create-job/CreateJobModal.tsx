@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { Job } from "@/features/jobs/kanban/types";
-import { Button } from "@/components/ui/button";
-import { JobForm, JobFormValues } from "./JobForm";
+import { JobForm } from "./JobForm";
+import { Job } from "../types/domain";
 
 interface CreateJobModalProps {
   open: boolean;
@@ -18,9 +17,7 @@ export function CreateJobModal({
 }: CreateJobModalProps) {
   const [isSaving, setIsSaving] = useState(false);
 
-  if (!open) return null;
-
-  const handleSubmit = async (values: JobFormValues) => {
+  const handleSubmit = async (values: Job) => {
     setIsSaving(true);
 
     try {
@@ -47,6 +44,7 @@ export function CreateJobModal({
     }
   };
 
+  if (!open) return null;
   return (
     <div
       className=" flex items-center justify-center bg-slate-950/40 p-4"

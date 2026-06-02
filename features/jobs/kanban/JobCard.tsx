@@ -1,7 +1,7 @@
 "use client";
 
 import { useDraggable } from "@dnd-kit/react";
-import { Job } from "./types";
+import { Job } from "../types/domain";
 
 interface JobCardProps {
   job: Job;

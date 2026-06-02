@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { deleteJob, updateJob, updateJobStatus } from "@/lib/supabase/jobs";
+import { deleteJob, updateJob, updateJobStatus } from "@/lib/server/jobs";
 
 export async function PATCH(
   request: Request,

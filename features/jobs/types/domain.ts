@@ -3,16 +3,19 @@ export type JobStatus =
   | "Interview"
   | "Offer"
   | "Rejected"
-  | "Saved";
+  | "Ghosted";
 
-export interface JobFormValues {
+export interface Job {
+  id: string;
   company: string;
   title: string;
-  source: string;
   status: JobStatus;
+  source: string;
   location: string;
   url: string;
   contactName: string;
   contactEmail: string;
   notes: string;
+  dateApplied: string;
+  jobDescription: string;
 }

@@ -4,21 +4,10 @@ import { FormEvent, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { JobStatus } from "@/features/jobs/kanban/types";
+import { Job } from "../types/domain";
 
-export interface JobFormValues {
-  company: string;
-  title: string;
-  source: string;
-  status: JobStatus;
-  location: string;
-  url: string;
-  contactName: string;
-  contactEmail: string;
-  notes: string;
-}
-
-const initialValues: JobFormValues = {
+const initialValues: Job = {
+  id: "",
   company: "",
   title: "",
   source: "job_post",
@@ -28,10 +17,12 @@ const initialValues: JobFormValues = {
   contactName: "",
   contactEmail: "",
   notes: "",
+  jobDescription: "",
+  dateApplied: "",
 };
 
 interface JobFormProps {
-  onSubmit: (values: JobFormValues) => void;
+  onSubmit: (values: Job) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
 }
@@ -41,14 +32,14 @@ export function JobForm({
   onCancel,
   isSubmitting = false,
 }: JobFormProps) {
-  const [values, setValues] = useState<JobFormValues>(initialValues);
+  const [values, setValues] = useState<Job>(initialValues);
   const [touched, setTouched] = useState(false);
 
   const isInvalid = useMemo(() => {
     return !values.company.trim() || !values.title.trim();
   }, [values.company, values.title]);
 
-  function updateField(field: keyof JobFormValues, value: string) {
+  function updateField(field: keyof Job, value: string) {
     setValues((prev) => ({ ...prev, [field]: value }));
   }
 
@@ -202,6 +193,19 @@ export function JobForm({
             />
           </div>
         </div>
+      </div>
+
+      {/*Job description */}
+      <div className="space-y-4">
+        <p className={sectionTitle}>Job Description</p>
+
+        <textarea
+          value={values.jobDescription}
+          onChange={(e) => updateField("jobDescription", e.target.value)}
+          rows={5}
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+          placeholder="Paste or write the job description..."
+        />
       </div>
 
       {/* NOTES */}

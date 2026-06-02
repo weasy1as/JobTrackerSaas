@@ -1,10 +1,8 @@
 import { AuthButton } from "@/components/auth-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
 import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 const features = [

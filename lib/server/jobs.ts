@@ -1,88 +1,7 @@
-import type { Job, JobStatus } from "@/features/jobs/kanban/types";
-import { createClient } from "./server";
-import { formatDate, normalizeStatus } from "@/lib/utils";
-
-interface JobRecord {
-  id: string;
-  company: string | null;
-  title: string | null;
-  status: string | null;
-  source: string | null;
-  location: string | null;
-  job_url: string | null;
-  contact_name: string | null;
-  contact_email: string | null;
-  notes: string | null;
-  date_applied: string | null;
-}
-
-type JobSelectRecord = Pick<
-  JobRecord,
-  | "id"
-  | "company"
-  | "title"
-  | "status"
-  | "source"
-  | "location"
-  | "job_url"
-  | "contact_name"
-  | "contact_email"
-  | "notes"
-  | "date_applied"
->;
-
-export interface CreateJobPayload {
-  company: string;
-  title: string;
-  source: string;
-  status: JobStatus;
-  location: string;
-  url: string;
-  contactName: string;
-  contactEmail: string;
-  notes: string;
-}
-
-export interface UpdateJobPayload {
-  company: string;
-  title: string;
-  source: string;
-  status: JobStatus;
-  location: string;
-  url: string;
-  contactName: string;
-  contactEmail: string;
-  notes: string;
-  dateApplied: string;
-}
-
-export interface UpdateJobStatusPayload {
-  status: JobStatus;
-}
-
-const statuses: JobStatus[] = [
-  "Applied",
-  "Interview",
-  "Offer",
-  "Rejected",
-  "Ghosted",
-];
-
-function mapJobRecord(job: JobSelectRecord): Job {
-  return {
-    id: job.id,
-    company: job.company ?? "",
-    title: job.title ?? "",
-    status: normalizeStatus(job.status, statuses, "Applied"),
-    source: job.source ?? "",
-    location: job.location ?? "",
-    url: job.job_url ?? "",
-    contactName: job.contact_name ?? "",
-    contactEmail: job.contact_email ?? "",
-    notes: job.notes ?? "",
-    dateApplied: formatDate(job.date_applied),
-  };
-}
+import { Job } from "@/features/jobs/types/domain";
+import { createClient } from "../supabase/server";
+import { mapJobRecord } from "@/lib/utils";
+import { JobSelectRecord } from "@/features/jobs/types/db";
 
 export async function getJobs(): Promise<Job[]> {
   const supabase = await createClient();
@@ -102,7 +21,7 @@ export async function getJobs(): Promise<Job[]> {
   const { data, error } = await supabase
     .from("jobs")
     .select(
-      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied",
+      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied, job_description",
     )
     .eq("user_id", user.id) // 🔥 THIS IS THE KEY FIX
     .order("created_at", { ascending: false });
@@ -115,7 +34,7 @@ export async function getJobs(): Promise<Job[]> {
   return (data ?? []).map(mapJobRecord);
 }
 
-export async function createJob(payload: CreateJobPayload): Promise<Job> {
+export async function createJob(payload: Job): Promise<Job> {
   const supabase = await createClient();
 
   const {
@@ -138,9 +57,10 @@ export async function createJob(payload: CreateJobPayload): Promise<Job> {
       contact_email: payload.contactEmail || null,
       notes: payload.notes || null,
       date_applied: new Date().toISOString(),
+      job_description: payload.jobDescription,
     })
     .select(
-      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied",
+      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied, job_description",
     )
     .single();
 
@@ -153,7 +73,7 @@ export async function createJob(payload: CreateJobPayload): Promise<Job> {
 
 export async function updateJobStatus(
   jobId: string,
-  payload: UpdateJobStatusPayload,
+  payload: Job,
 ): Promise<Job> {
   const supabase = await createClient();
 
@@ -185,10 +105,7 @@ export async function deleteJob(jobId: string): Promise<void> {
   }
 }
 
-export async function updateJob(
-  jobId: string,
-  payload: UpdateJobPayload,
-): Promise<Job> {
+export async function updateJob(jobId: string, payload: Job): Promise<Job> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -204,10 +121,11 @@ export async function updateJob(
       contact_email: payload.contactEmail || null,
       notes: payload.notes || null,
       date_applied: payload.dateApplied || null,
+      job_description: payload.jobDescription || null,
     })
     .eq("id", jobId)
     .select(
-      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied",
+      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied,job_description",
     )
     .single();
 

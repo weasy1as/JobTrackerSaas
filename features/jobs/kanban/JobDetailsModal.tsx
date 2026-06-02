@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Job, JobStatus } from "./types";
+import { Job, JobStatus } from "../types/domain";
+import { JobFormValues } from "../types/forms";
 
 interface JobDetailsModalProps {
   job: Job | null;
@@ -12,19 +13,6 @@ interface JobDetailsModalProps {
   onClose: () => void;
   onUpdate: (job: Job) => void;
   onDelete: (jobId: string) => void;
-}
-
-interface JobDetailsFormValues {
-  company: string;
-  title: string;
-  status: JobStatus;
-  source: string;
-  location: string;
-  url: string;
-  contactName: string;
-  contactEmail: string;
-  notes: string;
-  dateApplied: string;
 }
 
 const statusOptions: JobStatus[] = [
@@ -42,7 +30,7 @@ export function JobDetailsModal({
   onUpdate,
   onDelete,
 }: JobDetailsModalProps) {
-  const [values, setValues] = useState<JobDetailsFormValues | null>(null);
+  const [values, setValues] = useState<JobFormValues | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any | null>(null);
@@ -88,6 +76,7 @@ export function JobDetailsModal({
       contactEmail: job.contactEmail,
       notes: job.notes,
       dateApplied: job.dateApplied,
+      jobDescription: job.jobDescription,
     });
   }, [job]);
 
@@ -103,17 +92,15 @@ export function JobDetailsModal({
       job.contactName !== values.contactName ||
       job.contactEmail !== values.contactEmail ||
       job.notes !== values.notes ||
-      job.dateApplied !== values.dateApplied
+      job.dateApplied !== values.dateApplied ||
+      job?.jobDescription !== values.jobDescription
     );
   }, [job, values]);
 
-  const handleFieldChange = (
-    field: keyof JobDetailsFormValues,
-    value: string,
-  ) => {
+  const handleFieldChange = (field: keyof JobFormValues, value: string) => {
     setValues((current) =>
       current
-        ? { ...current, [field]: value as JobDetailsFormValues[typeof field] }
+        ? { ...current, [field]: value as JobFormValues[typeof field] }
         : current,
     );
   };
@@ -131,6 +118,7 @@ export function JobDetailsModal({
         contactEmail: job.contactEmail,
         notes: job.notes,
         dateApplied: job.dateApplied,
+        jobDescription: job.jobDescription,
       });
     }
     onClose();
@@ -335,6 +323,19 @@ export function JobDetailsModal({
                 onChange={(event) =>
                   handleFieldChange("dateApplied", event.target.value)
                 }
+              />
+            </div>
+            <div>
+              <Label htmlFor="jobDescription">Job Description</Label>
+              <textarea
+                id="jobDescription"
+                value={values.jobDescription ?? ""}
+                onChange={(event) =>
+                  handleFieldChange("jobDescription", event.target.value)
+                }
+                rows={4}
+                className="h-full min-h-[112px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                placeholder="Add job description about this role"
               />
             </div>
             <div>

@@ -1,3 +1,5 @@
+import { JobSelectRecord } from "@/features/jobs/types/db";
+import { Job, JobStatus } from "@/features/jobs/types/domain";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -23,6 +25,31 @@ export function formatDate(date: string | null) {
   if (Number.isNaN(parsed.getTime())) return "";
 
   return parsed.toISOString().split("T")[0];
+}
+
+const statuses: JobStatus[] = [
+  "Applied",
+  "Interview",
+  "Offer",
+  "Rejected",
+  "Ghosted",
+];
+
+export function mapJobRecord(job: JobSelectRecord): Job {
+  return {
+    id: job.id,
+    company: job.company ?? "",
+    title: job.title ?? "",
+    status: normalizeStatus(job.status, statuses, "Applied"),
+    source: job.source ?? "",
+    location: job.location ?? "",
+    url: job.job_url ?? "",
+    contactName: job.contact_name ?? "",
+    contactEmail: job.contact_email ?? "",
+    notes: job.notes ?? "",
+    dateApplied: formatDate(job.date_applied),
+    jobDescription: job.job_description ?? "",
+  };
 }
 
 // This check can be removed, it is just for tutorial purposes
