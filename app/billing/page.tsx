@@ -3,9 +3,16 @@ import {
   getUserSubscription,
   isProSubscription,
 } from "@/lib/supabase/subscriptions";
-import { Button } from "@/components/ui/button";
+import { StripeCheckoutButton } from "@/components/stripe-checkout-button";
 
-export default async function BillingPage() {
+interface BillingPageProps {
+  searchParams?: {
+    success?: string;
+    canceled?: string;
+  };
+}
+
+export default async function BillingPage({ searchParams }: BillingPageProps) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -26,6 +33,12 @@ export default async function BillingPage() {
   const subscription = await getUserSubscription(user.id);
   const isPro = isProSubscription(subscription);
 
+  const statusMessage = searchParams?.success
+    ? "Thank you! Your Pro subscription is now active."
+    : searchParams?.canceled
+      ? "Checkout canceled. You can try again anytime."
+      : "This page will show billing actions once payment integration is available. For now, Pro access is gated through your subscription row in Supabase.";
+
   return (
     <div className="mx-auto max-w-3xl p-6">
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
@@ -38,9 +51,7 @@ export default async function BillingPage() {
               Subscription
             </h1>
           </div>
-          <Button type="button" variant={isPro ? "secondary" : "default"}>
-            {isPro ? "You are on Pro" : "Upgrade to Pro"}
-          </Button>
+          <StripeCheckoutButton isPro={isPro} />
         </div>
 
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
@@ -68,11 +79,7 @@ export default async function BillingPage() {
 
         <div className="mt-8 rounded-3xl border border-slate-100 bg-slate-50 p-6">
           <p className="text-sm font-semibold text-slate-700">Next step</p>
-          <p className="mt-2 text-sm text-slate-600">
-            This page will show billing actions once payment integration is
-            available. For now, Pro access is gated through your subscription
-            row in Supabase.
-          </p>
+          <p className="mt-2 text-sm text-slate-600">{statusMessage}</p>
         </div>
       </div>
     </div>
