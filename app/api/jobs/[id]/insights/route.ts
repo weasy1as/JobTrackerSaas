@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import {
+  getUserSubscription,
+  isProSubscription,
+} from "@/lib/supabase/subscriptions";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -28,6 +32,11 @@ export async function POST(request: Request, { params }: Params) {
 
     if (jobError || !job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+
+    const subscription = await getUserSubscription(user.id);
+    if (!isProSubscription(subscription)) {
+      return NextResponse.json({ error: "Pro plan required" }, { status: 402 });
     }
 
     const OPENAI_KEY = process.env.OPENAI_API_KEY || process.env.OPENAI_KEY;

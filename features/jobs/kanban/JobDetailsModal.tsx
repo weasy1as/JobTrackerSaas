@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AiPaywall } from "@/features/jobs/ai/AiPaywall";
+import { useAiAccess } from "@/features/jobs/ai/useAiAccess";
 import { Job, JobStatus } from "../types/domain";
 import { JobFormValues } from "../types/forms";
 
@@ -35,6 +37,11 @@ export function JobDetailsModal({
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const {
+    isPro,
+    loading: aiAccessLoading,
+    error: accessError,
+  } = useAiAccess(open);
 
   const handleGenerateAI = async () => {
     if (!job) return;
@@ -360,21 +367,29 @@ export function JobDetailsModal({
               AI Insights
             </h3>
             <div>
-              <Button
-                type="button"
-                onClick={handleGenerateAI}
-                disabled={aiLoading}
-              >
-                {aiLoading ? "Analyzing..." : "Generate AI Insights"}
-              </Button>
+              {aiAccessLoading ? (
+                <p className="text-sm text-slate-500">Checking access...</p>
+              ) : isPro ? (
+                <Button
+                  type="button"
+                  onClick={handleGenerateAI}
+                  disabled={aiLoading}
+                >
+                  {aiLoading ? "Analyzing..." : "Generate AI Insights"}
+                </Button>
+              ) : null}
             </div>
           </div>
 
-          {aiError ? (
-            <p className="text-sm text-destructive">{aiError}</p>
+          {accessError ? (
+            <p className="text-sm text-destructive">{accessError}</p>
           ) : null}
 
-          {aiResult ? (
+          {aiAccessLoading ? (
+            <p className="text-sm text-slate-500">Checking access...</p>
+          ) : !isPro ? (
+            <AiPaywall />
+          ) : aiResult ? (
             <div className="space-y-3 rounded-lg border border-slate-100 bg-slate-50 p-4">
               {aiResult.summary ? (
                 <div>
