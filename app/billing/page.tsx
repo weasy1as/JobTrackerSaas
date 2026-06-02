@@ -62,14 +62,35 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
           <div className="rounded-3xl border border-slate-100 bg-slate-50 p-6">
             <p className="text-sm font-semibold text-slate-700">Current plan</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">
-              {subscription?.plan ? subscription.plan.toUpperCase() : "FREE"}
+
+            <p
+              className={`mt-2 text-2xl font-bold tracking-wide ${
+                subscription?.plan === "pro"
+                  ? "text-indigo-600"
+                  : "text-slate-900"
+              }`}
+            >
+              {subscription?.plan?.toUpperCase() ?? "FREE"}
             </p>
+
             <p className="mt-1 text-sm text-slate-600">
               {subscription?.status === "active"
-                ? "Active"
-                : "No active subscription"}
+                ? "Active subscription"
+                : "Free plan"}
             </p>
+
+            {/* Optional subtle badge */}
+            <div className="mt-3">
+              <span
+                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                  subscription?.plan === "pro"
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "bg-slate-200 text-slate-700"
+                }`}
+              >
+                {subscription?.plan === "pro" ? "PRO PLAN" : "FREE PLAN"}
+              </span>
+            </div>
           </div>
 
           <div className="rounded-3xl border border-slate-100 bg-slate-50 p-6">
