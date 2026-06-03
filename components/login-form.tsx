@@ -48,63 +48,103 @@ export function LoginForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
+    <div
+      className={cn(
+        "flex min-h-screen items-center justify-center  px-6",
+        className,
+      )}
+      {...props}
+    >
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+            Welcome back
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">
+            Sign in to continue tracking your job applications
+          </p>
+        </div>
+
+        {/* Card */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <form onSubmit={handleLogin} className="space-y-5">
+            {/* Email */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="email"
+                className="text-sm font-medium text-slate-700"
+              >
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-11 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-200"
+              />
             </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
+
+            {/* Password */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-slate-700"
+                >
+                  Password
+                </Label>
+
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-200"
+              />
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
+            {/* Submit */}
+            <Button
+              type="submit"
+              className="h-11 w-full rounded-xl bg-indigo-600 text-white hover:bg-indigo-700"
+              disabled={isLoading}
+            >
+              {isLoading ? "Logging in..." : "Sign in"}
+            </Button>
+
+            {/* Footer link */}
+            <p className="text-center text-sm text-slate-600">
+              Don’t have an account?{" "}
               <Link
                 href="/auth/sign-up"
-                className="underline underline-offset-4"
+                className="font-medium text-indigo-600 hover:text-indigo-700"
               >
-                Sign up
+                Create account
               </Link>
-            </div>
+            </p>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
