@@ -204,13 +204,15 @@ export function JobDetailsModal({
             </h2>
             <p className="text-sm text-slate-600">{job.company}</p>
           </div>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={handleCancel}
-            className="text-slate-500 transition hover:text-slate-800"
+            className="text-slate-500 hover:text-slate-800"
           >
             ✕
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-6 p-6">

@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 
 interface JobModalProps {
   open: boolean;
@@ -21,12 +22,15 @@ export default function JobModal({ open, onClose, children }: JobModalProps) {
 
       {/* modal */}
       <div className="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
-        <button
+        <Button
+          type="button"
           onClick={onClose}
+          variant="ghost"
+          size="icon"
           className="absolute right-4 top-4 text-slate-500 hover:text-slate-800"
         >
           ✕
-        </button>
+        </Button>
 
         {children}
       </div>

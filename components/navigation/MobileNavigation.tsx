@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/logout-button";
 
@@ -51,14 +52,16 @@ export default function MobileNavigation() {
           </p>
           <p className="text-sm text-slate-600">Tap to open the mobile menu.</p>
         </div>
-        <button
+        <Button
           type="button"
           onClick={() => setIsOpen((current) => !current)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 transition hover:bg-slate-200"
+          variant="ghost"
+          size="icon"
           aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+          className="text-slate-700"
         >
           {isOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        </Button>
       </div>
 
       {isOpen && (

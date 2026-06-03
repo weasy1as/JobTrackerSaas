@@ -1,6 +1,7 @@
 "use client";
 
 import { useDraggable } from "@dnd-kit/react";
+import { Button } from "@/components/ui/button";
 import { Job } from "../types/domain";
 
 interface JobCardProps {
@@ -28,15 +29,17 @@ export function JobCard({ job, onClick }: JobCardProps) {
       }`}
     >
       <div className="flex items-start gap-4">
-        <button
+        <Button
           type="button"
           ref={handleRef}
           onClick={(event) => event.stopPropagation()}
           aria-label="Drag job card"
-          className="flex h-11 w-11 items-center justify-center rounded-3xl border border-slate-200 bg-slate-100 text-slate-500 transition hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          variant="ghost"
+          size="icon"
+          className="border border-slate-200 bg-slate-100 text-slate-500 hover:bg-slate-200"
         >
           <span className="text-lg">≡</span>
-        </button>
+        </Button>
 
         <div onClick={onClick} className="flex-1 cursor-pointer">
           <div className="flex items-start justify-between gap-4">
