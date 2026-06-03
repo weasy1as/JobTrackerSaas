@@ -89,44 +89,70 @@ export default async function SettingsPage({
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className=" grid max-w-7xl gap-8 px-6 py-10 lg:grid-cols-[260px_minmax(0,1fr)]">
+      <div className=" grid gap-8 px-6 py-10 lg:grid-cols-[260px_minmax(0,1fr)]">
         <MobileNavigation />
         <FloatingSidebar />
 
         <section className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="mb-10 space-y-3">
+          <div className="mb-8">
             <p className="text-sm font-semibold uppercase tracking-[0.32em] text-indigo-600">
               Settings
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
               Manage your profile
             </h1>
-            <p className="max-w-2xl text-sm leading-7 text-slate-600">
-              Update your basic profile information and keep your account
-              details in sync.
+
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+              Update your account information and personalize your JobFlow
+              experience.
             </p>
-            <div className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
-              <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-6 text-center">
-                <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-indigo-100 text-3xl font-semibold text-indigo-700">
-                  {getInitials(profile?.full_name ?? null, user.email)}
+          </div>
+
+          {updated && (
+            <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              Profile updated successfully.
+            </div>
+          )}
+
+          <form action={updateProfile} className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+              {/* PROFILE OVERVIEW */}
+              <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                <div className="flex flex-col items-center text-center">
+                  <div className="mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-indigo-100 text-3xl font-semibold text-indigo-700">
+                    {getInitials(profile?.full_name ?? null, user.email)}
+                  </div>
+
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    {profile?.full_name ?? "No name set"}
+                  </h2>
+
+                  <p className="mt-1 text-sm text-slate-500">{user.email}</p>
+
+                  <div className="mt-4 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+                    JobFlow Account
+                  </div>
                 </div>
-                <p className="text-sm font-semibold text-slate-900">
-                  {profile?.full_name ?? "No name set"}
-                </p>
-                <p className="mt-2 text-sm text-slate-500">{user.email}</p>
               </div>
 
               <div className="space-y-6">
-                {updated && (
-                  <div className="rounded-3xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                    Profile updated successfully.
-                  </div>
-                )}
+                {/* PERSONAL INFORMATION */}
+                <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold text-slate-900">
+                      Personal Information
+                    </h2>
 
-                <form action={updateProfile} className="space-y-6">
-                  <div className="grid gap-6">
+                    <p className="mt-1 text-sm text-slate-500">
+                      Update how your profile appears throughout JobFlow.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-2">
                     <div className="grid gap-2">
                       <Label htmlFor="full_name">Full Name</Label>
+
                       <Input
                         id="full_name"
                         name="full_name"
@@ -137,6 +163,7 @@ export default async function SettingsPage({
 
                     <div className="grid gap-2">
                       <Label htmlFor="avatar_url">Avatar URL</Label>
+
                       <Input
                         id="avatar_url"
                         name="avatar_url"
@@ -145,34 +172,49 @@ export default async function SettingsPage({
                       />
                     </div>
                   </div>
+                </div>
 
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
-                    <p className="text-sm font-semibold text-slate-900">
-                      Account details
+                {/* ACCOUNT INFORMATION */}
+                <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold text-slate-900">
+                      Account Information
+                    </h2>
+
+                    <p className="mt-1 text-sm text-slate-500">
+                      Read-only account details.
                     </p>
-                    <div className="mt-4 space-y-2 text-sm text-slate-600">
-                      <div>
-                        <span className="font-medium text-slate-900">
-                          User ID:
-                        </span>{" "}
-                        {user.id}
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-900">
-                          Email:
-                        </span>{" "}
+                  </div>
+
+                  <div className="divide-y divide-slate-200">
+                    <div className="flex items-center justify-between py-4">
+                      <span className="text-sm font-medium text-slate-500">
+                        Email
+                      </span>
+
+                      <span className="text-sm text-slate-900">
                         {user.email}
-                      </div>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between py-4">
+                      <span className="text-sm font-medium text-slate-500">
+                        User ID
+                      </span>
+
+                      <span className="max-w-[320px] truncate text-sm text-slate-900">
+                        {user.id}
+                      </span>
                     </div>
                   </div>
+                </div>
 
-                  <div className="flex items-center justify-end gap-3">
-                    <Button type="submit">Save changes</Button>
-                  </div>
-                </form>
+                <div className="flex justify-end">
+                  <Button type="submit">Save Changes</Button>
+                </div>
               </div>
             </div>
-          </div>
+          </form>
         </section>
       </div>
     </main>
