@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import type { Job } from "@/features/jobs/kanban/types";
 import FloatingSidebar from "@/components/navigation/FloatingSidebar";
 import MobileNavigation from "@/components/navigation/MobileNavigation";
 import KanbanBoard from "@/features/jobs/kanban/KanbanBoard";
 import { AddJobButton } from "@/features/jobs/create-job/AddJobButton";
 import { CreateJobModal } from "@/features/jobs/create-job/CreateJobModal";
+import { Job } from "@/features/jobs/types/domain";
+import { JobDetailsModal } from "@/features/jobs/kanban/JobDetailsModal";
 
 interface DashboardClientProps {
   jobs: Job[];
@@ -15,6 +16,7 @@ interface DashboardClientProps {
 export default function DashboardClient({ jobs }: DashboardClientProps) {
   const [open, setOpen] = useState(false);
   const [jobList, setJobList] = useState<Job[]>(jobs);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const handleJobCreated = (job: Job) => {
     setJobList((current) => [job, ...current]);
@@ -28,7 +30,13 @@ export default function DashboardClient({ jobs }: DashboardClientProps) {
         <FloatingSidebar />
         <section className="relative w-full flex flex-col-reverse md:flex-row rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
           {/* BLUR LAYER WRAPPER */}
-          <div className={open ? "blur-sm transition-all duration-200" : ""}>
+          <div
+            className={
+              open || Boolean(selectedJob)
+                ? "blur-sm transition-all duration-200"
+                : ""
+            }
+          >
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -42,7 +50,7 @@ export default function DashboardClient({ jobs }: DashboardClientProps) {
               <AddJobButton onClick={() => setOpen(true)} />
             </div>
 
-            <KanbanBoard jobs={jobList} />
+            <KanbanBoard jobs={jobList} onSelectJob={setSelectedJob} />
           </div>
 
           {/* MODAL (no blur) */}
@@ -50,6 +58,27 @@ export default function DashboardClient({ jobs }: DashboardClientProps) {
             open={open}
             onOpenChange={setOpen}
             onJobCreated={handleJobCreated}
+          />
+          <JobDetailsModal
+            job={selectedJob}
+            open={Boolean(selectedJob)}
+            onClose={() => setSelectedJob(null)}
+            onUpdate={(updatedJob) => {
+              setJobList((currentJobs) =>
+                currentJobs.map((job) =>
+                  job.id === updatedJob.id ? updatedJob : job,
+                ),
+              );
+
+              setSelectedJob(updatedJob);
+            }}
+            onDelete={(jobId) => {
+              setJobList((currentJobs) =>
+                currentJobs.filter((job) => job.id !== jobId),
+              );
+
+              setSelectedJob(null);
+            }}
           />
         </section>
       </div>

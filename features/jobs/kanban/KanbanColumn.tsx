@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { useDroppable } from "@dnd-kit/react";
-import { Job, JobStatus } from "./types";
+import { Job, JobStatus } from "../types/domain";
 
 interface KanbanColumnProps {
   status: JobStatus;

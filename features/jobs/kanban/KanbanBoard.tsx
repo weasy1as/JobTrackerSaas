@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { DragDropProvider } from "@dnd-kit/react";
-import { Job, JobStatus } from "./types";
+
 import { KanbanColumn } from "./KanbanColumn";
 import { JobCard } from "./JobCard";
 import { JobDetailsModal } from "./JobDetailsModal";
+import { Job, JobStatus } from "../types/domain";
 
 const statuses: JobStatus[] = [
   "Applied",
@@ -17,15 +18,18 @@ const statuses: JobStatus[] = [
 
 interface KanbanBoardProps {
   jobs: Job[];
+  onSelectJob: (job: Job) => void;
 }
 
 function isStatusId(id: string): id is JobStatus {
   return statuses.includes(id as JobStatus);
 }
 
-export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
+export default function KanbanBoard({
+  jobs: initialJobs,
+  onSelectJob,
+}: KanbanBoardProps) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   useEffect(() => {
     setJobs(initialJobs);
@@ -128,7 +132,7 @@ export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
                   <JobCard
                     key={job.id}
                     job={job}
-                    onClick={() => setSelectedJob(job)}
+                    onClick={() => onSelectJob(job)}
                   />
                 ))}
               </KanbanColumn>
@@ -136,26 +140,6 @@ export default function KanbanBoard({ jobs: initialJobs }: KanbanBoardProps) {
           </div>
         </DragDropProvider>
       </div>
-
-      <JobDetailsModal
-        job={selectedJob}
-        open={Boolean(selectedJob)}
-        onClose={() => setSelectedJob(null)}
-        onUpdate={(updatedJob) => {
-          setJobs((currentJobs) =>
-            currentJobs.map((job) =>
-              job.id === updatedJob.id ? updatedJob : job,
-            ),
-          );
-          setSelectedJob(updatedJob);
-        }}
-        onDelete={(jobId) => {
-          setJobs((currentJobs) =>
-            currentJobs.filter((job) => job.id !== jobId),
-          );
-          setSelectedJob(null);
-        }}
-      />
     </div>
   );
 }
