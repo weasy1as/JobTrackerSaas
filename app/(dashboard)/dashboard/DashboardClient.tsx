@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FloatingSidebar from "@/components/navigation/FloatingSidebar";
 import MobileNavigation from "@/components/navigation/MobileNavigation";
 import KanbanBoard from "@/features/jobs/kanban/KanbanBoard";
@@ -8,6 +8,7 @@ import { AddJobButton } from "@/features/jobs/create-job/AddJobButton";
 import { CreateJobModal } from "@/features/jobs/create-job/CreateJobModal";
 import { Job } from "@/features/jobs/types/domain";
 import { JobDetailsModal } from "@/features/jobs/kanban/JobDetailsModal";
+import { getUser } from "@/lib/utils";
 
 interface DashboardClientProps {
   jobs: Job[];
@@ -21,7 +22,9 @@ export default function DashboardClient({ jobs }: DashboardClientProps) {
   const handleJobCreated = (job: Job) => {
     setJobList((current) => [job, ...current]);
   };
-  console.log(jobs);
+  useEffect(() => {
+    setJobList(jobs);
+  }, [jobs]);
 
   return (
     <main className="min-h-screen bg-slate-50">

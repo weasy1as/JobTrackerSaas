@@ -120,16 +120,30 @@ export default async function SettingsPage({
               {/* PROFILE OVERVIEW */}
               <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
                 <div className="flex flex-col items-center text-center">
-                  <div className="mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-indigo-100 text-3xl font-semibold text-indigo-700">
-                    {getInitials(profile?.full_name ?? null, user.email)}
+                  {/* AVATAR */}
+                  <div className="mb-5 h-24 w-24 overflow-hidden rounded-full bg-indigo-100">
+                    {profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt="User avatar"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-indigo-700">
+                        {getInitials(profile?.full_name ?? null, user.email)}
+                      </div>
+                    )}
                   </div>
 
+                  {/* NAME */}
                   <h2 className="text-lg font-semibold text-slate-900">
                     {profile?.full_name ?? "No name set"}
                   </h2>
 
+                  {/* EMAIL */}
                   <p className="mt-1 text-sm text-slate-500">{user.email}</p>
 
+                  {/* BADGE */}
                   <div className="mt-4 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
                     JobFlow Account
                   </div>

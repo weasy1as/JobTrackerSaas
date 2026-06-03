@@ -2,6 +2,8 @@ import { JobSelectRecord } from "@/features/jobs/types/db";
 import { Job, JobStatus } from "@/features/jobs/types/domain";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { createClient } from "./supabase/client";
+import { AppUser } from "@/features/jobs/types/user";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -56,3 +58,15 @@ export function mapJobRecord(job: JobSelectRecord): Job {
 export const hasEnvVars =
   process.env.NEXT_PUBLIC_SUPABASE_URL &&
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+export async function getUser(): Promise<AppUser | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data?.user) {
+    return null;
+  }
+
+  return data.user as AppUser;
+}
