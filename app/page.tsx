@@ -54,8 +54,13 @@ export default async function Home() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4 text-sm font-medium text-slate-700">
           <Link
             href="/"
-            className="text-xl font-semibold tracking-tight text-slate-900"
+            className="inline-flex items-center gap-3 text-xl font-semibold tracking-tight text-slate-900"
           >
+            <img
+              src="/Jobflow-Icon.png"
+              alt="JobFlow logo"
+              className="h-8 w-8 rounded-xl border border-slate-200 bg-white"
+            />
             JobFlow
           </Link>
 
@@ -94,7 +99,7 @@ export default async function Home() {
 
       {/* HERO */}
       <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
-        <div className="text-center mb-12 max-w-2xl mx-auto">
+        <div className="text-center mb-12 max-w-2xl mx-auto animate-fade-in">
           <h1 className="text-[2.4rem] sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
             Organize. Track. Prepare. Offer.
           </h1>
@@ -108,19 +113,22 @@ export default async function Home() {
           <div className="mt-7">
             <Link
               href="/auth/sign-up"
-              className="inline-block bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-xl px-7 py-3 text-sm font-semibold shadow-sm"
+              className="inline-block bg-indigo-600 text-white rounded-xl px-7 py-3 text-sm font-semibold shadow-sm
+             transition-all duration-200
+             hover:bg-indigo-700 hover:-translate-y-0.5 hover:shadow-lg
+             active:translate-y-0 active:shadow-sm"
             >
               Start Tracking for Free
             </Link>
           </div>
         </div>
 
-        <div className="mt-16 mx-auto max-w-5xl overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-2xl">
-          <img
-            src="/dashboard-screenshot.png"
-            alt="JobFlow dashboard preview"
-            className="w-full h-auto"
-          />
+        <div className="relative mt-16 mx-auto max-w-5xl">
+          <div className="absolute -inset-10 bg-indigo-500/10 blur-3xl rounded-full" />
+
+          <div className="relative overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-2xl">
+            <img src="/dashboard-screenshot.png" className="w-full h-auto" />
+          </div>
         </div>
       </section>
 

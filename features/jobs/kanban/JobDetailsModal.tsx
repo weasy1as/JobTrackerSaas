@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -143,15 +144,19 @@ export function JobDetailsModal({
       });
 
       if (!response.ok) {
-        console.error("Failed to update job", await response.text());
+        const errorText = await response.text();
+        console.error("Failed to update job", errorText);
+        toast.error("Unable to update job. Please try again.");
         return;
       }
 
       const updatedJob: Job = await response.json();
       onUpdate(updatedJob);
+      toast.success("Job updated successfully.");
       onClose();
     } catch (error) {
       console.error("Unable to update job", error);
+      toast.error("Unable to update job. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -171,14 +176,18 @@ export function JobDetailsModal({
       });
 
       if (!response.ok) {
-        console.error("Failed to delete job", await response.text());
+        const errorText = await response.text();
+        console.error("Failed to delete job", errorText);
+        toast.error("Unable to delete job. Please try again.");
         return;
       }
 
       onDelete(job.id);
+      toast.success("Job deleted successfully.");
       onClose();
     } catch (error) {
       console.error("Unable to delete job", error);
+      toast.error("Unable to delete job. Please try again.");
     } finally {
       setIsSaving(false);
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { JobForm } from "./JobForm";
 import { Job } from "../types/domain";
 
@@ -30,15 +31,19 @@ export function CreateJobModal({
       });
 
       if (!response.ok) {
-        console.error("Failed to create job", await response.text());
+        const errorText = await response.text();
+        console.error("Failed to create job", errorText);
+        toast.error("Unable to create job. Please try again.");
         return;
       }
 
       const createdJob: Job = await response.json();
       onJobCreated(createdJob);
+      toast.success("Job created successfully.");
       onOpenChange(false);
     } catch (error) {
       console.error("Create job error", error);
+      toast.error("Unable to create job. Please try again.");
     } finally {
       setIsSaving(false);
     }

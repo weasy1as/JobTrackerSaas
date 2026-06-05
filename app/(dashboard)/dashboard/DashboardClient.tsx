@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Toaster } from "sonner";
 import FloatingSidebar from "@/components/navigation/FloatingSidebar";
 import MobileNavigation from "@/components/navigation/MobileNavigation";
 import KanbanBoard from "@/features/jobs/kanban/KanbanBoard";
@@ -8,7 +9,6 @@ import { AddJobButton } from "@/features/jobs/create-job/AddJobButton";
 import { CreateJobModal } from "@/features/jobs/create-job/CreateJobModal";
 import { Job } from "@/features/jobs/types/domain";
 import { JobDetailsModal } from "@/features/jobs/kanban/JobDetailsModal";
-import { getUser } from "@/lib/utils";
 
 interface DashboardClientProps {
   jobs: Job[];
@@ -32,6 +32,7 @@ export default function DashboardClient({ jobs }: DashboardClientProps) {
         <MobileNavigation />
         <FloatingSidebar />
         <section className="relative w-full flex flex-col-reverse md:flex-row rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+          <Toaster position="bottom-right" />
           {/* BLUR LAYER WRAPPER */}
           <div
             className={`transition-all duration-200 w-full ${

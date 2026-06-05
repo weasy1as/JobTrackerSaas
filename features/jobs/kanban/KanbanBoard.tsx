@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { DragDropProvider } from "@dnd-kit/react";
+import { toast } from "sonner";
 
 import { KanbanColumn } from "./KanbanColumn";
 import { JobCard } from "./JobCard";
-import { JobDetailsModal } from "./JobDetailsModal";
 import { Job, JobStatus } from "../types/domain";
 
 const statuses: JobStatus[] = [
@@ -90,6 +90,8 @@ export default function KanbanBoard({
       return [...nextJobs, movedJob];
     });
 
+    const previousJobs = jobs;
+
     // Persist to Supabase
     fetch(`/api/jobs/${jobId}`, {
       method: "PATCH",
@@ -97,11 +99,20 @@ export default function KanbanBoard({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ status: targetStatus }),
-    }).catch((error) => {
-      console.error("Failed to update job status:", error);
-      // Revert UI on failure
-      setJobs(jobs);
-    });
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || "Failed to update job status");
+        }
+
+        toast.success(`Job moved to ${targetStatus}.`);
+      })
+      .catch((error) => {
+        console.error("Failed to update job status:", error);
+        setJobs(previousJobs);
+        toast.error("Unable to move job. Please try again.");
+      });
   };
 
   return (

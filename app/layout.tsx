@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   title: "JobFlow | Job application tracker",
   description:
     "Track your job search with a modern Kanban dashboard, AI interview prep, and insight-driven job application management.",
+  icons: [
+    { rel: "icon", url: "/Jobflow-Icon.png" },
+    { rel: "apple-touch-icon", url: "/Jobflow-Icon.png" },
+  ],
 };
 
 const geistSans = Geist({
