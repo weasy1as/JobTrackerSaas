@@ -34,11 +34,9 @@ export default function DashboardClient({ jobs }: DashboardClientProps) {
         <section className="relative w-full flex flex-col-reverse md:flex-row rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
           {/* BLUR LAYER WRAPPER */}
           <div
-            className={
-              open || Boolean(selectedJob)
-                ? "blur-sm transition-all duration-200"
-                : ""
-            }
+            className={`transition-all duration-200 w-full ${
+              open || Boolean(selectedJob) ? "blur-sm" : ""
+            }`}
           >
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>

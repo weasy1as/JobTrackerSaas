@@ -105,41 +105,38 @@ export default function KanbanBoard({
   };
 
   return (
-    <div className="flex space-y-8">
+    <div className="flex flex-col space-y-8">
+      {" "}
       <div>
-        {" "}
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.32em] text-indigo-600">
-            Dashboard
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
-            Job pipeline
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-            Track your applications through every stage with drag-and-drop
-            cards.
-          </p>
-        </div>
-        <DragDropProvider onDragEnd={handleDragEnd}>
-          <div className="grid w-full max-w-full gap-6 pb-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            {statuses.map((status) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                jobs={groupedJobs[status]}
-              >
-                {groupedJobs[status].map((job) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                    onClick={() => onSelectJob(job)}
-                  />
-                ))}
-              </KanbanColumn>
-            ))}
-          </div>
-        </DragDropProvider>
+        <p className="text-sm font-semibold uppercase tracking-[0.32em] text-indigo-600">
+          Dashboard
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
+          Job pipeline
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+          Track your applications through every stage with drag-and-drop cards.
+        </p>
       </div>
+      <DragDropProvider onDragEnd={handleDragEnd}>
+        <div className="grid w-full max-w-full gap-6 pb-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {statuses.map((status) => (
+            <KanbanColumn
+              key={status}
+              status={status}
+              jobs={groupedJobs[status]}
+            >
+              {groupedJobs[status].map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onClick={() => onSelectJob(job)}
+                />
+              ))}
+            </KanbanColumn>
+          ))}
+        </div>
+      </DragDropProvider>
     </div>
   );
 }
