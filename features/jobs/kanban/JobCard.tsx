@@ -32,13 +32,13 @@ export function JobCard({ job, onClick }: JobCardProps) {
       ref={ref}
       style={style}
       onClick={onClick}
-      className={`relative w-full rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 cursor-pointer ${
+      className={`relative w-full rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 cursor-pointer ${
         isDragging
           ? "ring-2 ring-indigo-300"
           : "hover:-translate-y-0.5 hover:border-slate-300"
       }`}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3">
         <Button
           type="button"
           ref={handleRef}
