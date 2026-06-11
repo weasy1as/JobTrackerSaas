@@ -1,5 +1,3 @@
-import FloatingSidebar from "@/components/navigation/FloatingSidebar";
-import MobileNavigation from "@/components/navigation/MobileNavigation";
 import { getJobs } from "@/lib/server/jobs";
 import DashboardClient from "./DashboardClient";
 

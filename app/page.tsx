@@ -1,7 +1,8 @@
 import { AuthButton } from "@/components/auth-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
-import { Button } from "@/components/ui/button";
+
 import { hasEnvVars } from "@/lib/utils";
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -127,7 +128,13 @@ export default async function Home() {
           <div className="absolute -inset-10 bg-indigo-500/10 blur-3xl rounded-full" />
 
           <div className="relative overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-2xl">
-            <img src="/dashboard-screenshot.png" className="w-full h-auto" />
+            <Image
+              alt=""
+              height={1000}
+              width={1000}
+              src="/dashboard-screenshot.png"
+              className="w-full h-auto"
+            />
           </div>
         </div>
       </section>

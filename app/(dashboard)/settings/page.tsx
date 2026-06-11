@@ -51,10 +51,7 @@ async function updateProfile(formData: FormData) {
     avatar_url: avatar_url || null,
   };
 
-  const { error } = await supabase.from("profiles").upsert(updates, {
-    returning: "minimal",
-  });
-
+  const { error } = await supabase.from("profiles").upsert(updates);
   if (error) {
     throw new Error("Failed to update profile.");
   }
@@ -130,7 +127,10 @@ export default async function SettingsPage({
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-indigo-700">
-                        {getInitials(profile?.full_name ?? null, user.email)}
+                        {getInitials(
+                          profile?.full_name ?? null,
+                          user.email ?? null,
+                        )}
                       </div>
                     )}
                   </div>
