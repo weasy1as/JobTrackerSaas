@@ -1,80 +1,75 @@
 import { Job } from "@/features/jobs/types/domain";
 import { JobFormValues } from "@/features/jobs/types/forms";
-import { createClient } from "../supabase/server";
-import { mapJobRecord } from "@/lib/utils";
 import { JobSelectRecord } from "@/features/jobs/types/db";
+import { mapJobRecord } from "@/lib/utils";
+import { createClient } from "../supabase/server";
+import { JobServiceError } from "./job-errors";
 
-export async function getJobs(): Promise<Job[]> {
+const JOB_SELECT =
+  "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied, job_description";
+
+async function authenticatedClient() {
   const supabase = await createClient();
-
-  // 1. Get current user
   const {
     data: { user },
-    error: userError,
+    error,
   } = await supabase.auth.getUser();
 
-  if (userError || !user) {
-    console.error("No authenticated user found");
-    return [];
+  if (error || !user) {
+    throw new JobServiceError(
+      "unauthorized",
+      "You must be signed in to manage jobs.",
+      { cause: error },
+    );
   }
 
-  // 2. Fetch only this user's jobs
+  return { supabase, userId: user.id };
+}
+
+function databaseError(message: string, error: unknown): JobServiceError {
+  console.error(message, error);
+  return new JobServiceError("database", message, { cause: error });
+}
+
+export async function getJobs(): Promise<Job[]> {
+  const { supabase, userId } = await authenticatedClient();
   const { data, error } = await supabase
     .from("jobs")
-    .select(
-      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied, job_description",
-    )
-    .eq("user_id", user.id) // 🔥 THIS IS THE KEY FIX
+    .select(JOB_SELECT)
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Failed to fetch jobs:", error);
-    return [];
+    throw databaseError("Unable to load your jobs.", error);
   }
 
-  return (data ?? []).map(mapJobRecord);
+  return (data ?? []).map((record) =>
+    mapJobRecord(record as JobSelectRecord),
+  );
 }
 
 export async function getJobById(jobId: string): Promise<Job | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) return null;
-
+  const { supabase, userId } = await authenticatedClient();
   const { data, error } = await supabase
     .from("jobs")
-    .select(
-      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied, job_description",
-    )
+    .select(JOB_SELECT)
     .eq("id", jobId)
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error) {
-    throw new Error(error.message);
+    throw databaseError("Unable to load this job.", error);
   }
 
   return data ? mapJobRecord(data as JobSelectRecord) : null;
 }
 
 export async function createJob(payload: JobFormValues): Promise<Job> {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
+  const { supabase, userId } = await authenticatedClient();
   const { data, error } = await supabase
     .from("jobs")
     .insert({
-      user_id: user.id,
+      user_id: userId,
       company: payload.company,
       title: payload.title,
       status: payload.status,
@@ -87,13 +82,11 @@ export async function createJob(payload: JobFormValues): Promise<Job> {
       date_applied: payload.dateApplied || null,
       job_description: payload.jobDescription || null,
     })
-    .select(
-      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied, job_description",
-    )
+    .select(JOB_SELECT)
     .single();
 
   if (error || !data) {
-    throw new Error(error?.message ?? "Failed to create job");
+    throw databaseError("Unable to create the job.", error);
   }
 
   return mapJobRecord(data as JobSelectRecord);
@@ -103,33 +96,40 @@ export async function updateJobStatus(
   jobId: string,
   payload: Pick<JobFormValues, "status">,
 ): Promise<Job> {
-  const supabase = await createClient();
-
+  const { supabase, userId } = await authenticatedClient();
   const { data, error } = await supabase
     .from("jobs")
-    .update({
-      status: payload.status,
-    })
+    .update({ status: payload.status })
     .eq("id", jobId)
-    .select(
-      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied",
-    )
-    .single();
+    .eq("user_id", userId)
+    .select(JOB_SELECT)
+    .maybeSingle();
 
-  if (error || !data) {
-    throw new Error(error?.message ?? "Failed to update job status");
+  if (error) {
+    throw databaseError("Unable to update the job status.", error);
+  }
+  if (!data) {
+    throw new JobServiceError("not_found", "Job not found.");
   }
 
   return mapJobRecord(data as JobSelectRecord);
 }
 
 export async function deleteJob(jobId: string): Promise<void> {
-  const supabase = await createClient();
-
-  const { error } = await supabase.from("jobs").delete().eq("id", jobId);
+  const { supabase, userId } = await authenticatedClient();
+  const { data, error } = await supabase
+    .from("jobs")
+    .delete()
+    .eq("id", jobId)
+    .eq("user_id", userId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
-    throw new Error(error.message ?? "Failed to delete job");
+    throw databaseError("Unable to delete the job.", error);
+  }
+  if (!data) {
+    throw new JobServiceError("not_found", "Job not found.");
   }
 }
 
@@ -137,8 +137,7 @@ export async function updateJob(
   jobId: string,
   payload: JobFormValues,
 ): Promise<Job> {
-  const supabase = await createClient();
-
+  const { supabase, userId } = await authenticatedClient();
   const { data, error } = await supabase
     .from("jobs")
     .update({
@@ -155,13 +154,15 @@ export async function updateJob(
       job_description: payload.jobDescription || null,
     })
     .eq("id", jobId)
-    .select(
-      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied,job_description",
-    )
-    .single();
+    .eq("user_id", userId)
+    .select(JOB_SELECT)
+    .maybeSingle();
 
-  if (error || !data) {
-    throw new Error(error?.message ?? "Failed to update job");
+  if (error) {
+    throw databaseError("Unable to update the job.", error);
+  }
+  if (!data) {
+    throw new JobServiceError("not_found", "Job not found.");
   }
 
   return mapJobRecord(data as JobSelectRecord);

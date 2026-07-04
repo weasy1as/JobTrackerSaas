@@ -3,6 +3,7 @@ import { JobFormPage } from "@/features/jobs/job-pages/JobFormPage";
 import { JobPageShell } from "@/features/jobs/job-pages/JobPageShell";
 import { jobToFormValues } from "@/features/jobs/types/forms";
 import { getJobById } from "@/lib/server/jobs";
+import { isValidJobId } from "@/features/jobs/validation";
 
 interface EditJobPageProps {
   params: Promise<{ id: string }>;
@@ -10,6 +11,7 @@ interface EditJobPageProps {
 
 export default async function EditJobPage({ params }: EditJobPageProps) {
   const { id } = await params;
+  if (!isValidJobId(id)) notFound();
   const job = await getJobById(id);
 
   if (!job) notFound();

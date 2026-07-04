@@ -95,8 +95,10 @@ export default function KanbanBoard({
     })
       .then(async (response) => {
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(errorText || "Failed to update job status");
+          const body = (await response.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          throw new Error(body?.error || "Unable to update job status.");
         }
 
         toast.success(`Job moved to ${targetStatus}.`);
@@ -104,7 +106,11 @@ export default function KanbanBoard({
       .catch((error) => {
         console.error("Failed to update job status:", error);
         setJobs(previousJobs);
-        toast.error("Unable to move job. Please try again.");
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Unable to move job. Please try again.",
+        );
       });
   };
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast, Toaster } from "sonner";
 import { JobForm } from "../create-job/JobForm";
 import { JobFormValues } from "../types/forms";
+import { JobFieldErrors } from "../validation";
 
 interface JobFormPageProps {
   mode: "create" | "edit";
@@ -22,6 +23,7 @@ export function JobFormPage({
   const router = useRouter();
   const [isDirty, setIsDirty] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<JobFieldErrors>({});
 
   useEffect(() => {
     function warnBeforeUnload(event: BeforeUnloadEvent) {
@@ -40,6 +42,7 @@ export function JobFormPage({
 
   async function submit(values: JobFormValues) {
     setIsSubmitting(true);
+    setFieldErrors({});
     try {
       const response = await fetch(
         mode === "create" ? "/api/jobs" : `/api/jobs/${jobId}`,
@@ -51,7 +54,11 @@ export function JobFormPage({
       );
 
       if (!response.ok) {
-        const body = await response.json().catch(() => null);
+        const body = (await response.json().catch(() => null)) as {
+          error?: string;
+          fieldErrors?: JobFieldErrors;
+        } | null;
+        if (body?.fieldErrors) setFieldErrors(body.fieldErrors);
         throw new Error(body?.error || "Unable to save job.");
       }
 
@@ -78,6 +85,7 @@ export function JobFormPage({
         onCancel={cancel}
         onDirtyChange={setIsDirty}
         isSubmitting={isSubmitting}
+        serverFieldErrors={fieldErrors}
       />
     </>
   );

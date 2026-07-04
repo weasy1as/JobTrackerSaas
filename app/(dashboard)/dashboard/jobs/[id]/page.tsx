@@ -9,6 +9,7 @@ import {
   JOB_STATUS_BADGE_STYLES,
 } from "@/features/jobs/constants";
 import { getJobById } from "@/lib/server/jobs";
+import { isValidJobId } from "@/features/jobs/validation";
 
 interface JobDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -31,6 +32,7 @@ export default async function JobDetailsPage({
   params,
 }: JobDetailsPageProps) {
   const { id } = await params;
+  if (!isValidJobId(id)) notFound();
   const job = await getJobById(id);
 
   if (!job) notFound();

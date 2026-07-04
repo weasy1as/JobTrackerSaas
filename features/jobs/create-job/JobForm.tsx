@@ -7,6 +7,10 @@ import { Label } from "@/components/ui/label";
 import { JobSource, JobStatus } from "../types/domain";
 import { JobFormValues } from "../types/forms";
 import { JOB_SOURCE_OPTIONS, JOB_STATUSES } from "../constants";
+import {
+  JobFieldErrors,
+  parseJobFormValues,
+} from "../validation";
 
 interface JobFormProps {
   initialValues: JobFormValues;
@@ -15,6 +19,15 @@ interface JobFormProps {
   onCancel: () => void;
   onDirtyChange: (dirty: boolean) => void;
   isSubmitting?: boolean;
+  serverFieldErrors?: JobFieldErrors;
+}
+
+function FieldError({ message }: { message?: string }) {
+  return message ? (
+    <p className="text-xs text-red-600" role="alert">
+      {message}
+    </p>
+  ) : null;
 }
 
 export function JobForm({
@@ -24,14 +37,20 @@ export function JobForm({
   onCancel,
   onDirtyChange,
   isSubmitting = false,
+  serverFieldErrors = {},
 }: JobFormProps) {
   const [values, setValues] = useState(initialValues);
-  const [submitted, setSubmitted] = useState(false);
+  const [fieldErrors, setFieldErrors] =
+    useState<JobFieldErrors>(serverFieldErrors);
 
   useEffect(() => {
     setValues(initialValues);
-    setSubmitted(false);
+    setFieldErrors({});
   }, [initialValues]);
+
+  useEffect(() => {
+    setFieldErrors(serverFieldErrors);
+  }, [serverFieldErrors]);
 
   const isDirty = useMemo(
     () => JSON.stringify(values) !== JSON.stringify(initialValues),
@@ -42,19 +61,28 @@ export function JobForm({
     onDirtyChange(isDirty);
   }, [isDirty, onDirtyChange]);
 
-  const isInvalid = !values.company.trim() || !values.title.trim();
-
   function updateField<K extends keyof JobFormValues>(
     field: K,
     value: JobFormValues[K],
   ) {
     setValues((current) => ({ ...current, [field]: value }));
+    setFieldErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitted(true);
-    if (!isInvalid) await onSubmit(values);
+    const parsed = parseJobFormValues(values);
+    if (!parsed.success) {
+      setFieldErrors(parsed.fieldErrors);
+      return;
+    }
+    setFieldErrors({});
+    await onSubmit(parsed.data);
   }
 
   const selectClass =
@@ -63,7 +91,7 @@ export function JobForm({
     "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} noValidate className="space-y-8">
       <section className="space-y-4">
         <div>
           <h3 className="text-sm font-semibold text-slate-900">Essentials</h3>
@@ -83,8 +111,9 @@ export function JobForm({
                 updateField("company", event.target.value)
               }
               placeholder="Google"
-              aria-invalid={submitted && !values.company.trim()}
+              aria-invalid={Boolean(fieldErrors.company)}
             />
+            <FieldError message={fieldErrors.company} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="job-title">Job title *</Label>
@@ -93,8 +122,9 @@ export function JobForm({
               value={values.title}
               onChange={(event) => updateField("title", event.target.value)}
               placeholder="Frontend Engineer"
-              aria-invalid={submitted && !values.title.trim()}
+              aria-invalid={Boolean(fieldErrors.title)}
             />
+            <FieldError message={fieldErrors.title} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="job-status">Status</Label>
@@ -102,6 +132,7 @@ export function JobForm({
               id="job-status"
               className={selectClass}
               value={values.status}
+              aria-invalid={Boolean(fieldErrors.status)}
               onChange={(event) =>
                 updateField("status", event.target.value as JobStatus)
               }
@@ -112,6 +143,7 @@ export function JobForm({
                 </option>
               ))}
             </select>
+            <FieldError message={fieldErrors.status} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="job-source">Source</Label>
@@ -119,6 +151,7 @@ export function JobForm({
               id="job-source"
               className={selectClass}
               value={values.source}
+              aria-invalid={Boolean(fieldErrors.source)}
               onChange={(event) =>
                 updateField("source", event.target.value as JobSource)
               }
@@ -129,6 +162,7 @@ export function JobForm({
                 </option>
               ))}
             </select>
+            <FieldError message={fieldErrors.source} />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="job-date">Date applied</Label>
@@ -136,18 +170,14 @@ export function JobForm({
               id="job-date"
               type="date"
               value={values.dateApplied}
+              aria-invalid={Boolean(fieldErrors.dateApplied)}
               onChange={(event) =>
                 updateField("dateApplied", event.target.value)
               }
             />
+            <FieldError message={fieldErrors.dateApplied} />
           </div>
         </div>
-
-        {submitted && isInvalid ? (
-          <p role="alert" className="text-sm text-red-600">
-            Company and job title are required.
-          </p>
-        ) : null}
       </section>
 
       <section className="space-y-4 border-t border-slate-100 pt-6">
@@ -177,9 +207,11 @@ export function JobForm({
               id="job-url"
               type="url"
               value={values.url}
+              aria-invalid={Boolean(fieldErrors.url)}
               onChange={(event) => updateField("url", event.target.value)}
               placeholder="https://..."
             />
+            <FieldError message={fieldErrors.url} />
           </div>
         </div>
       </section>
@@ -209,11 +241,13 @@ export function JobForm({
               id="job-contact-email"
               type="email"
               value={values.contactEmail}
+              aria-invalid={Boolean(fieldErrors.contactEmail)}
               onChange={(event) =>
                 updateField("contactEmail", event.target.value)
               }
               placeholder="jane@company.com"
             />
+            <FieldError message={fieldErrors.contactEmail} />
           </div>
         </div>
       </section>
@@ -266,7 +300,7 @@ export function JobForm({
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting || isInvalid}>
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting
             ? mode === "create"
               ? "Creating..."

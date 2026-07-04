@@ -1,28 +1,37 @@
 import { NextResponse } from "next/server";
 import { createJob } from "@/lib/server/jobs";
+import {
+  jobServiceErrorStatus,
+  safeJobServiceError,
+} from "@/lib/server/job-errors";
+import { parseJobFormValues } from "@/features/jobs/validation";
 
 export async function POST(request: Request) {
+  let payload: unknown;
   try {
-    const payload = await request.json();
-    if (
-      !payload ||
-      typeof payload.company !== "string" ||
-      !payload.company.trim() ||
-      typeof payload.title !== "string" ||
-      !payload.title.trim()
-    ) {
-      return NextResponse.json(
-        { error: "Company and job title are required." },
-        { status: 400 },
-      );
-    }
-    const job = await createJob(payload);
+    payload = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Request body must be valid JSON." },
+      { status: 400 },
+    );
+  }
+
+  const parsed = parseJobFormValues(payload);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error, fieldErrors: parsed.fieldErrors },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const job = await createJob(parsed.data);
     return NextResponse.json(job);
   } catch (error) {
-    const message = (error as Error).message ?? "Unable to create job";
     return NextResponse.json(
-      { error: message },
-      { status: message === "Unauthorized" ? 401 : 500 },
+      { error: safeJobServiceError(error, "Unable to create job.") },
+      { status: jobServiceErrorStatus(error) },
     );
   }
 }
