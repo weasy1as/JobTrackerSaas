@@ -4,20 +4,15 @@ import { ArrowLeft, ExternalLink, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteJobButton } from "@/features/jobs/job-pages/DeleteJobButton";
 import { JobPageShell } from "@/features/jobs/job-pages/JobPageShell";
-import { Job } from "@/features/jobs/types/domain";
+import {
+  JOB_SOURCE_LABELS,
+  JOB_STATUS_BADGE_STYLES,
+} from "@/features/jobs/constants";
 import { getJobById } from "@/lib/server/jobs";
 
 interface JobDetailsPageProps {
   params: Promise<{ id: string }>;
 }
-
-const sourceLabels: Record<Job["source"], string> = {
-  job_post: "Job post",
-  networking: "Networking",
-  recruiter: "Recruiter",
-  email: "Email",
-  other: "Other",
-};
 
 function Detail({ label, value }: { label: string; value?: string }) {
   return (
@@ -66,11 +61,13 @@ export default async function JobDetailsPage({
 
       <div className="space-y-8">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${JOB_STATUS_BADGE_STYLES[job.status]}`}
+          >
             {job.status}
           </span>
           <span className="text-sm text-slate-500">
-            {sourceLabels[job.source]}
+            {JOB_SOURCE_LABELS[job.source]}
           </span>
         </div>
 

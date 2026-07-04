@@ -1,9 +1,11 @@
 import { JobSelectRecord } from "@/features/jobs/types/db";
 import {
   Job,
-  JobSource,
-  JobStatus,
 } from "@/features/jobs/types/domain";
+import {
+  JOB_SOURCES,
+  JOB_STATUSES,
+} from "@/features/jobs/constants";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { createClient } from "./supabase/client";
@@ -33,29 +35,13 @@ export function formatDate(date: string | null) {
   return parsed.toISOString().split("T")[0];
 }
 
-const statuses: JobStatus[] = [
-  "Applied",
-  "Interview",
-  "Offer",
-  "Rejected",
-  "Ghosted",
-];
-
-const sources: JobSource[] = [
-  "job_post",
-  "networking",
-  "recruiter",
-  "email",
-  "other",
-];
-
 export function mapJobRecord(job: JobSelectRecord): Job {
   return {
     id: job.id,
     company: job.company ?? "",
     title: job.title ?? "",
-    status: normalizeStatus(job.status, statuses, "Applied"),
-    source: normalizeStatus(job.source, sources, "job_post"),
+    status: normalizeStatus(job.status, JOB_STATUSES, "Applied"),
+    source: normalizeStatus(job.source, JOB_SOURCES, "job_post"),
     location: job.location ?? "",
     url: job.job_url ?? "",
     contactName: job.contact_name ?? "",

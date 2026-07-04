@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { useDroppable } from "@dnd-kit/react";
 import { Job, JobStatus } from "../types/domain";
+import { JOB_STATUS_BADGE_STYLES } from "../constants";
 
 interface KanbanColumnProps {
   status: JobStatus;
@@ -10,30 +11,24 @@ interface KanbanColumnProps {
   children: ReactNode;
 }
 
-const badgeStyles: Record<JobStatus, string> = {
-  Applied: "bg-slate-100 text-slate-700",
-  Interview: "bg-sky-100 text-sky-700",
-  Offer: "bg-emerald-100 text-emerald-700",
-  Rejected: "bg-rose-100 text-rose-700",
-  Ghosted: "bg-amber-100 text-amber-700",
-};
-
 export function KanbanColumn({ status, jobs, children }: KanbanColumnProps) {
   const { ref, isDropTarget: isOver } = useDroppable({ id: status });
 
   return (
-    <div className="w-full">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
-            {status}
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-slate-900">
-            {jobs.length}
-          </p>
-        </div>
+    <section
+      className="w-full md:w-80 md:flex-none"
+      aria-labelledby={`column-${status}`}
+    >
+      <div className="mb-3 flex items-center justify-between gap-3 px-1">
+        <h2
+          id={`column-${status}`}
+          className="text-sm font-semibold text-slate-800"
+        >
+          {status}
+        </h2>
         <span
-          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${badgeStyles[status]}`}
+          className={`inline-flex min-w-7 items-center justify-center rounded-full px-2 py-1 text-xs font-semibold ${JOB_STATUS_BADGE_STYLES[status]}`}
+          aria-label={`${jobs.length} jobs`}
         >
           {jobs.length}
         </span>
@@ -42,17 +37,19 @@ export function KanbanColumn({ status, jobs, children }: KanbanColumnProps) {
       <div
         ref={ref}
         className={
-          `min-h-[360px] rounded-[2rem] border border-slate-200/80 bg-slate-50 p-4 transition duration-200 ` +
-          (isOver ? "border-indigo-300/80 bg-indigo-50" : "")
+          `min-h-48 rounded-2xl border bg-slate-50 p-3 transition duration-200 md:min-h-[440px] ` +
+          (isOver
+            ? "border-indigo-400 bg-indigo-50 ring-2 ring-indigo-100"
+            : "border-slate-200")
         }
       >
-        <div className="flex flex-col gap-4">{children}</div>
+        <div className="flex flex-col gap-3">{children}</div>
         {jobs.length === 0 ? (
-          <div className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-white/60 p-6 text-center text-sm text-slate-500">
-            No jobs in this stage yet.
+          <div className="flex min-h-28 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white/60 px-4 text-center text-sm text-slate-500">
+            Drop a job here
           </div>
         ) : null}
       </div>
-    </div>
+    </section>
   );
 }

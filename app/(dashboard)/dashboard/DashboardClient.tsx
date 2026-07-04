@@ -21,21 +21,25 @@ export default function DashboardClient({ jobs }: DashboardClientProps) {
       <div className="grid w-full gap-8 px-6 py-10 lg:grid-cols-[260px_minmax(0,1fr)]">
         <MobileNavigation />
         <FloatingSidebar />
-        <section className="w-full rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="min-w-0 w-full rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <Toaster position="bottom-right" />
           <div className="w-full">
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+                <p className="text-sm font-semibold uppercase tracking-[0.32em] text-indigo-600">
                   Dashboard
                 </p>
-                <h1 className="mt-2 text-2xl font-semibold text-slate-900">
-                  Job board
+                <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
+                  Job pipeline
                 </h1>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                  Track your applications through every stage with
+                  drag-and-drop cards.
+                </p>
               </div>
 
               <Button asChild>
-                <Link href="/dashboard/jobs/new">Create Job</Link>
+                <Link href="/dashboard/jobs/new">Create job</Link>
               </Button>
             </div>
 

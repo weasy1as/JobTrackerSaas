@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { JobSource, JobStatus } from "../types/domain";
 import { JobFormValues } from "../types/forms";
+import { JOB_SOURCE_OPTIONS, JOB_STATUSES } from "../constants";
 
 interface JobFormProps {
   initialValues: JobFormValues;
@@ -105,11 +106,11 @@ export function JobForm({
                 updateField("status", event.target.value as JobStatus)
               }
             >
-              <option value="Applied">Applied</option>
-              <option value="Interview">Interview</option>
-              <option value="Offer">Offer</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Ghosted">Ghosted</option>
+              {JOB_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
             </select>
           </div>
           <div className="space-y-2">
@@ -122,11 +123,11 @@ export function JobForm({
                 updateField("source", event.target.value as JobSource)
               }
             >
-              <option value="job_post">Job post</option>
-              <option value="networking">Networking</option>
-              <option value="recruiter">Recruiter</option>
-              <option value="email">Email</option>
-              <option value="other">Other</option>
+              {JOB_SOURCE_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
           <div className="space-y-2 sm:col-span-2">

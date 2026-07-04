@@ -1,20 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { DragDropProvider } from "@dnd-kit/react";
+import { DragDropProvider, type DragEndEvent } from "@dnd-kit/react";
 import { toast } from "sonner";
 
 import { KanbanColumn } from "./KanbanColumn";
 import { JobCard } from "./JobCard";
 import { Job, JobStatus } from "../types/domain";
-
-const statuses: JobStatus[] = [
-  "Applied",
-  "Interview",
-  "Offer",
-  "Rejected",
-  "Ghosted",
-];
+import { JOB_STATUSES } from "../constants";
 
 interface KanbanBoardProps {
   jobs: Job[];
@@ -22,7 +15,7 @@ interface KanbanBoardProps {
 }
 
 function isStatusId(id: string): id is JobStatus {
-  return statuses.includes(id as JobStatus);
+  return JOB_STATUSES.includes(id as JobStatus);
 }
 
 export default function KanbanBoard({
@@ -37,7 +30,7 @@ export default function KanbanBoard({
 
   const groupedJobs = useMemo(
     () =>
-      statuses.reduce(
+      JOB_STATUSES.reduce(
         (acc, status) => {
           acc[status] = jobs.filter((job) => job.status === status);
           return acc;
@@ -47,7 +40,7 @@ export default function KanbanBoard({
     [jobs],
   );
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     if (event.canceled) return;
 
     const jobId = event.operation?.source?.id as string | undefined;
@@ -116,22 +109,13 @@ export default function KanbanBoard({
   };
 
   return (
-    <div className="flex flex-col space-y-8">
-      {" "}
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.32em] text-indigo-600">
-          Dashboard
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
-          Job pipeline
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          Track your applications through every stage with drag-and-drop cards.
-        </p>
-      </div>
+    <div className="min-w-0">
       <DragDropProvider onDragEnd={handleDragEnd}>
-        <div className="grid w-full max-w-full gap-6 pb-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {statuses.map((status) => (
+        <div
+          className="flex w-full flex-col gap-5 md:flex-row md:overflow-x-auto md:overscroll-x-contain md:pb-5"
+          aria-label="Job pipeline board"
+        >
+          {JOB_STATUSES.map((status) => (
             <KanbanColumn
               key={status}
               status={status}
