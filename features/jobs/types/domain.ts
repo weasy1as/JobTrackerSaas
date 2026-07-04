@@ -5,12 +5,19 @@ export type JobStatus =
   | "Rejected"
   | "Ghosted";
 
+export type JobSource =
+  | "job_post"
+  | "networking"
+  | "recruiter"
+  | "email"
+  | "other";
+
 export interface Job {
   id: string;
   company: string;
   title: string;
   status: JobStatus;
-  source: string;
+  source: JobSource;
   location: string;
   url: string;
   contactName: string;

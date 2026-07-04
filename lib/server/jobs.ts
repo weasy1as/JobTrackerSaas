@@ -1,4 +1,5 @@
 import { Job } from "@/features/jobs/types/domain";
+import { JobFormValues } from "@/features/jobs/types/forms";
 import { createClient } from "../supabase/server";
 import { mapJobRecord } from "@/lib/utils";
 import { JobSelectRecord } from "@/features/jobs/types/db";
@@ -34,19 +35,46 @@ export async function getJobs(): Promise<Job[]> {
   return (data ?? []).map(mapJobRecord);
 }
 
-export async function createJob(payload: Job): Promise<Job> {
+export async function getJobById(jobId: string): Promise<Job | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) return null;
+
+  const { data, error } = await supabase
+    .from("jobs")
+    .select(
+      "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied, job_description",
+    )
+    .eq("id", jobId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data ? mapJobRecord(data as JobSelectRecord) : null;
+}
+
+export async function createJob(payload: JobFormValues): Promise<Job> {
   const supabase = await createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const userId = user?.id;
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
 
   const { data, error } = await supabase
     .from("jobs")
     .insert({
-      user_id: userId,
+      user_id: user.id,
       company: payload.company,
       title: payload.title,
       status: payload.status,
@@ -56,8 +84,8 @@ export async function createJob(payload: Job): Promise<Job> {
       contact_name: payload.contactName || null,
       contact_email: payload.contactEmail || null,
       notes: payload.notes || null,
-      date_applied: new Date().toISOString(),
-      job_description: payload.jobDescription,
+      date_applied: payload.dateApplied || null,
+      job_description: payload.jobDescription || null,
     })
     .select(
       "id, company, title, status, source, location, job_url, contact_name, contact_email, notes, date_applied, job_description",
@@ -73,7 +101,7 @@ export async function createJob(payload: Job): Promise<Job> {
 
 export async function updateJobStatus(
   jobId: string,
-  payload: Job,
+  payload: Pick<JobFormValues, "status">,
 ): Promise<Job> {
   const supabase = await createClient();
 
@@ -105,7 +133,10 @@ export async function deleteJob(jobId: string): Promise<void> {
   }
 }
 
-export async function updateJob(jobId: string, payload: Job): Promise<Job> {
+export async function updateJob(
+  jobId: string,
+  payload: JobFormValues,
+): Promise<Job> {
   const supabase = await createClient();
 
   const { data, error } = await supabase

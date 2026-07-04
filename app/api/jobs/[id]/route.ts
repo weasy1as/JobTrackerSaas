@@ -8,14 +8,29 @@ export async function PATCH(
   try {
     const { id } = await params;
     const payload = await request.json();
-
-    const job =
+    const isStatusOnly =
       payload &&
       typeof payload === "object" &&
       "status" in payload &&
-      Object.keys(payload).length === 1
-        ? await updateJobStatus(id, payload)
-        : await updateJob(id, payload);
+      Object.keys(payload).length === 1;
+
+    if (
+      !isStatusOnly &&
+      (!payload ||
+        typeof payload.company !== "string" ||
+        !payload.company.trim() ||
+        typeof payload.title !== "string" ||
+        !payload.title.trim())
+    ) {
+      return NextResponse.json(
+        { error: "Company and job title are required." },
+        { status: 400 },
+      );
+    }
+
+    const job = isStatusOnly
+      ? await updateJobStatus(id, payload)
+      : await updateJob(id, payload);
 
     return NextResponse.json(job);
   } catch (error) {

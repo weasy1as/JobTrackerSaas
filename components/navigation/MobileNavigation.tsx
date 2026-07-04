@@ -72,7 +72,9 @@ export default function MobileNavigation() {
               href={href}
               className={cn(
                 "flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium transition-colors duration-150",
-                pathname === href
+                pathname === href ||
+                  (href === "/dashboard" &&
+                    pathname.startsWith("/dashboard/jobs/"))
                   ? "bg-indigo-50 text-slate-900"
                   : "bg-slate-50 text-slate-700 hover:bg-slate-100",
               )}
@@ -81,7 +83,9 @@ export default function MobileNavigation() {
               <span
                 className={cn(
                   "inline-flex h-10 w-10 items-center justify-center rounded-2xl",
-                  pathname === href
+                  pathname === href ||
+                    (href === "/dashboard" &&
+                      pathname.startsWith("/dashboard/jobs/"))
                     ? "bg-indigo-100 text-indigo-700"
                     : "bg-slate-200 text-slate-600",
                 )}

@@ -1,118 +1,109 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Job } from "../types/domain";
-
-const initialValues: Job = {
-  id: "",
-  company: "",
-  title: "",
-  source: "job_post",
-  status: "Applied",
-  location: "",
-  url: "",
-  contactName: "",
-  contactEmail: "",
-  notes: "",
-  jobDescription: "",
-  dateApplied: "",
-};
+import { JobSource, JobStatus } from "../types/domain";
+import { JobFormValues } from "../types/forms";
 
 interface JobFormProps {
-  onSubmit: (values: Job) => void;
+  initialValues: JobFormValues;
+  mode: "create" | "edit";
+  onSubmit: (values: JobFormValues) => Promise<void>;
   onCancel: () => void;
+  onDirtyChange: (dirty: boolean) => void;
   isSubmitting?: boolean;
 }
 
 export function JobForm({
+  initialValues,
+  mode,
   onSubmit,
   onCancel,
+  onDirtyChange,
   isSubmitting = false,
 }: JobFormProps) {
-  const [values, setValues] = useState<Job>(initialValues);
-  const [touched, setTouched] = useState(false);
+  const [values, setValues] = useState(initialValues);
+  const [submitted, setSubmitted] = useState(false);
 
-  const isInvalid = useMemo(() => {
-    return !values.company.trim() || !values.title.trim();
-  }, [values.company, values.title]);
-
-  function updateField(field: keyof Job, value: string) {
-    setValues((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setTouched(true);
-
-    if (isInvalid) return;
-
-    onSubmit(values);
+  useEffect(() => {
     setValues(initialValues);
-    setTouched(false);
+    setSubmitted(false);
+  }, [initialValues]);
+
+  const isDirty = useMemo(
+    () => JSON.stringify(values) !== JSON.stringify(initialValues),
+    [initialValues, values],
+  );
+
+  useEffect(() => {
+    onDirtyChange(isDirty);
+  }, [isDirty, onDirtyChange]);
+
+  const isInvalid = !values.company.trim() || !values.title.trim();
+
+  function updateField<K extends keyof JobFormValues>(
+    field: K,
+    value: JobFormValues[K],
+  ) {
+    setValues((current) => ({ ...current, [field]: value }));
   }
 
-  const inputClass =
-    "h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm shadow-sm transition focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200";
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitted(true);
+    if (!isInvalid) await onSubmit(values);
+  }
 
   const selectClass =
-    "h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm shadow-sm transition focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200";
-
-  const sectionTitle =
-    "text-xs font-semibold uppercase tracking-wider text-slate-500";
+    "h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100";
+  const textareaClass =
+    "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100";
 
   return (
-    <form onSubmit={handleSubmit} className="">
-      {/* HEADER HINT */}
-      <div className="space-y-">
-        <h3 className="text-sm font-medium text-slate-900">
-          Add a new job application
-        </h3>
-        <p className="text-xs text-slate-500">
-          Fill in the details to track your progress
-        </p>
-      </div>
-
-      {/* BASIC INFO */}
-      <div className="space-y-4">
-        <p className={sectionTitle}>Basic info</p>
-
-        <div className="grid md:grid-cols-2 gap-4 sm:grid-cols-2">
-          <div>
-            <Label>Company *</Label>
-            <Input
-              className={inputClass}
-              value={values.company}
-              onChange={(e) => updateField("company", e.target.value)}
-              placeholder="Google"
-            />
-          </div>
-
-          <div>
-            <Label>Job Title *</Label>
-            <Input
-              className={inputClass}
-              value={values.title}
-              onChange={(e) => updateField("title", e.target.value)}
-              placeholder="Frontend Engineer"
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <section className="space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900">Essentials</h3>
+          <p className="mt-1 text-sm text-slate-500">
+            The core information for this opportunity.
+          </p>
         </div>
-      </div>
 
-      {/* STATUS */}
-      <div className="space-y-4">
-        <p className={sectionTitle}>Pipeline</p>
-
-        <div className="grid md:grid-cols-2 gap-4 sm:grid-cols-2">
-          <div>
-            <Label>Status</Label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="job-company">Company *</Label>
+            <Input
+              id="job-company"
+              autoFocus
+              value={values.company}
+              onChange={(event) =>
+                updateField("company", event.target.value)
+              }
+              placeholder="Google"
+              aria-invalid={submitted && !values.company.trim()}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="job-title">Job title *</Label>
+            <Input
+              id="job-title"
+              value={values.title}
+              onChange={(event) => updateField("title", event.target.value)}
+              placeholder="Frontend Engineer"
+              aria-invalid={submitted && !values.title.trim()}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="job-status">Status</Label>
             <select
+              id="job-status"
               className={selectClass}
               value={values.status}
-              onChange={(e) => updateField("status", e.target.value)}
+              onChange={(event) =>
+                updateField("status", event.target.value as JobStatus)
+              }
             >
               <option value="Applied">Applied</option>
               <option value="Interview">Interview</option>
@@ -121,13 +112,15 @@ export function JobForm({
               <option value="Ghosted">Ghosted</option>
             </select>
           </div>
-
-          <div>
-            <Label>Source</Label>
+          <div className="space-y-2">
+            <Label htmlFor="job-source">Source</Label>
             <select
+              id="job-source"
               className={selectClass}
               value={values.source}
-              onChange={(e) => updateField("source", e.target.value)}
+              onChange={(event) =>
+                updateField("source", event.target.value as JobSource)
+              }
             >
               <option value="job_post">Job post</option>
               <option value="networking">Networking</option>
@@ -136,110 +129,151 @@ export function JobForm({
               <option value="other">Other</option>
             </select>
           </div>
-        </div>
-      </div>
-
-      {/* DETAILS */}
-      <div className="space-y-4">
-        <p className={sectionTitle}>Details</p>
-
-        <div className="grid md:grid-cols-2 gap-4 sm:grid-cols-2">
-          <div>
-            <Label>Location</Label>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="job-date">Date applied</Label>
             <Input
-              className={inputClass}
-              value={values.location}
-              onChange={(e) => updateField("location", e.target.value)}
-              placeholder="Remote / Copenhagen"
+              id="job-date"
+              type="date"
+              value={values.dateApplied}
+              onChange={(event) =>
+                updateField("dateApplied", event.target.value)
+              }
             />
           </div>
+        </div>
 
-          <div>
-            <Label>Job URL</Label>
+        {submitted && isInvalid ? (
+          <p role="alert" className="text-sm text-red-600">
+            Company and job title are required.
+          </p>
+        ) : null}
+      </section>
+
+      <section className="space-y-4 border-t border-slate-100 pt-6">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900">
+            Opportunity details
+          </h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Optional context you may want later.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="job-location">Location</Label>
             <Input
-              className={inputClass}
+              id="job-location"
+              value={values.location}
+              onChange={(event) =>
+                updateField("location", event.target.value)
+              }
+              placeholder="Remote / Berlin"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="job-url">Job URL</Label>
+            <Input
+              id="job-url"
               type="url"
               value={values.url}
-              onChange={(e) => updateField("url", e.target.value)}
+              onChange={(event) => updateField("url", event.target.value)}
               placeholder="https://..."
             />
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* CONTACT */}
-      <div className="space-y-4">
-        <p className={sectionTitle}>Contact</p>
-
-        <div className="grid md:grid-cols-2 gap-4 sm:grid-cols-2">
-          <div>
-            <Label>Name</Label>
+      <section className="space-y-4 border-t border-slate-100 pt-6">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900">Contact</h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Optional recruiter or hiring contact.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="job-contact-name">Name</Label>
             <Input
-              className={inputClass}
+              id="job-contact-name"
               value={values.contactName}
-              onChange={(e) => updateField("contactName", e.target.value)}
+              onChange={(event) =>
+                updateField("contactName", event.target.value)
+              }
               placeholder="Jane Doe"
             />
           </div>
-
-          <div>
-            <Label>Email</Label>
+          <div className="space-y-2">
+            <Label htmlFor="job-contact-email">Email</Label>
             <Input
-              className={inputClass}
+              id="job-contact-email"
               type="email"
               value={values.contactEmail}
-              onChange={(e) => updateField("contactEmail", e.target.value)}
+              onChange={(event) =>
+                updateField("contactEmail", event.target.value)
+              }
               placeholder="jane@company.com"
             />
           </div>
         </div>
-      </div>
+      </section>
 
-      {/*Job description */}
-      <div className="space-y-4">
-        <p className={sectionTitle}>Job Description</p>
-
-        <textarea
-          value={values.jobDescription}
-          onChange={(e) => updateField("jobDescription", e.target.value)}
-          rows={5}
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-          placeholder="Paste or write the job description..."
-        />
-      </div>
-
-      {/* NOTES */}
-      <div className="space-y-">
-        <p className={sectionTitle}>Notes</p>
-
-        <textarea
-          value={values.notes}
-          onChange={(e) => updateField("notes", e.target.value)}
-          rows={4}
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-          placeholder="Anything important about this role..."
-        />
-      </div>
-
-      {/* ACTIONS */}
-      <div className="flex items-center justify-between pt-2">
+      <section className="space-y-4 border-t border-slate-100 pt-6">
         <div>
-          {touched && isInvalid && (
-            <p className="text-sm text-red-500">
-              Company and Job Title are required
-            </p>
-          )}
+          <h3 className="text-sm font-semibold text-slate-900">
+            Description and notes
+          </h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Keep the posting and your private notes together.
+          </p>
         </div>
-
-        <div className="flex gap-3">
-          <Button type="button" variant="secondary" onClick={onCancel}>
-            Cancel
-          </Button>
-
-          <Button type="submit" disabled={isSubmitting || isInvalid}>
-            {isSubmitting ? "Creating…" : "Create Job"}
-          </Button>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="job-description">Job description</Label>
+            <textarea
+              id="job-description"
+              value={values.jobDescription}
+              onChange={(event) =>
+                updateField("jobDescription", event.target.value)
+              }
+              rows={6}
+              className={textareaClass}
+              placeholder="Paste or write the job description..."
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="job-notes">Notes</Label>
+            <textarea
+              id="job-notes"
+              value={values.notes}
+              onChange={(event) =>
+                updateField("notes", event.target.value)
+              }
+              rows={4}
+              className={textareaClass}
+              placeholder="Anything important about this role..."
+            />
+          </div>
         </div>
+      </section>
+
+      <div className="sticky bottom-0 -mx-6 flex justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting || isInvalid}>
+          {isSubmitting
+            ? mode === "create"
+              ? "Creating..."
+              : "Saving..."
+            : mode === "create"
+              ? "Create job"
+              : "Save changes"}
+        </Button>
       </div>
     </form>
   );

@@ -50,7 +50,11 @@ export default function FloatingSidebar() {
               key={href}
               href={href}
               icon={Icon}
-              active={pathname === href}
+              active={
+                pathname === href ||
+                (href === "/dashboard" &&
+                  pathname.startsWith("/dashboard/jobs/"))
+              }
             >
               {label}
             </SidebarItem>
